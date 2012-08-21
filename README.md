@@ -8,7 +8,7 @@ Building
 
 The program is using the [libusb-1.0][3] library and should work on all major platforms. To build on Debian/Ubuntu:
 
- * `sudo apt-get install libusb-1.0-0.dev`
+ * `sudo apt-get install libusb-1.0-0-dev`
  * `make`
 
 Examples
