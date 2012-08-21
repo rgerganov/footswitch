@@ -305,7 +305,7 @@ void write_combo(const char *key, int modifiers) {
     //printf("write combo '%s', mods: %d\n", key, modifiers);
     if (key != NULL) {
         if (!encode_key(key, &b)) {
-            fprintf(stderr, "Cannot decode key\n");
+            fprintf(stderr, "Cannot encode key '%s'\n", key);
             return;
         }
     }
