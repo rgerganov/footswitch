@@ -1,5 +1,6 @@
 /*
 Copyright (c) 2012 Radoslav Gerganov <rgerganov@gmail.com>
+Copyright (c) 2012 Daniel Manjarres <danmanj@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -117,12 +118,6 @@ void write_magic_end() {
     usleep(50 * 1000);
 }
 
-void read_key(unsigned char data[]) {
-    char str[64];
-    decode_byte(data[3], str);
-    printf("%s\n", str);
-}
-
 void read_mouse(unsigned char data[]) {
     int x = data[5], y = data[6], w = data[7];
     switch (data[4]) {
@@ -168,9 +163,8 @@ void read_combo(unsigned char data[]) {
             break;
     }
     if (data[3] != 0) {
-        char str[64];
-        decode_byte(data[3], str);
-        strcat(combo, str);
+        const char *key = decode_byte(data[3]);
+        strcat(combo, key);
     } else {
         size_t len = strlen(combo);
         if (len > 0) {
@@ -183,7 +177,7 @@ void read_combo(unsigned char data[]) {
 void read_string(unsigned char data[]) {
     int r = 0, tr = 0, ind = 2;
     int len = data[0] - 2;
-    char str[64];
+    const char *str = NULL;
 
     while (len > 0) {
         if (ind == 8) {
@@ -196,7 +190,7 @@ void read_string(unsigned char data[]) {
             }
             ind = 0;
         }
-        decode_byte(data[ind], str);
+        str = decode_byte(data[ind]);
         printf("%s", str);
         len--;
         ind++;
@@ -217,7 +211,7 @@ void read_usb() {
     switch (data[1]) {
         case 1:
         case 0x81:
-            read_key(data);
+            read_combo(data);
             break;
         case 2:
             read_mouse(data);

@@ -54,6 +54,6 @@ Bool encode_string(const char *str, unsigned char *arr);
 
 Bool encode_key(const char *key, unsigned char *b);
 
-Bool decode_byte(unsigned char b, char *str);
+const char* decode_byte(unsigned char b);
 
 #endif
