@@ -308,17 +308,17 @@ void write_combo(const char *key, int modifiers) {
     memset(data, 0, 8);
     data[0] = 8;
     data[1] = 1;
+    if (modifiers & MOUSE_MODS) {
+        data[1] |= 2;
+    }
+    data[2] = modifiers & KEYBOARD_MODS;
     data[3] = b;
-    if (modifiers & KEYBOARD_MODS) {
-        data[1] = 3;
-        data[2] = modifiers & KEYBOARD_MODS;
-        if (modifiers & MOUSE_LEFT) {
-            data[4] = 1;
-        } else if (modifiers & MOUSE_RIGHT) {
-            data[4] = 2;
-        } else if (modifiers & MOUSE_MIDDLE) {
-            data[4] = 4;
-        }
+    if (modifiers & MOUSE_LEFT) {
+        data[4] = 1;
+    } else if (modifiers & MOUSE_RIGHT) {
+        data[4] = 2;
+    } else if (modifiers & MOUSE_MIDDLE) {
+        data[4] = 4;
     }
     //debug_arr(data, 8);
     usb_write(data);
