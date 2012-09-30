@@ -56,19 +56,21 @@ pedal_data *curr_pedal = &pd.pedals[1]; // start at the second pedal
 #define STRING_TYPE    4
 
 void usage() {
-    fprintf(stderr, "Usage: footswitch [-123] [-r] [-s <string>] [-S <raw_string>] [-k <key>] [-m <modifier>] [-xyw <XYW>]\n"
+    fprintf(stderr, "Usage: footswitch [-123] [-r] [-s <string>] [-S <raw_string>] [-ak <key>] [-m <modifier>] [-b <mouse_btn>] [-xyw <XYW>]\n"
         "   -r          - read all foot switches\n"
         "   -1          - program the first foot switch\n"
         "   -2          - program the second foot switch (default)\n"
         "   -3          - program the third foot switch\n"
-        "   -s string   - write the specified string\n"
-        "   -S rstring  - write the specified raw string (hex numbers delimited with spaces)\n"
-        "   -k key      - write the specified key; cannot be used with -s or -S\n"
+        "   -s string   - append the specified string\n"
+        "   -S rstring  - append the specified raw string (hex numbers delimited with spaces)\n"
+        "   -a key      - append the specified key\n"
+        "   -k key      - write the specified key\n"
         "   -m modifier - ctrl|shift|alt|win\n"
         "   -b button   - mouse_left|mouse_middle|mouse_right\n"
         "   -x X        - move the mouse cursor horizontally by X pixels\n"
         "   -y Y        - move the mouse cursor vertically by Y pixels\n"
-        "   -w W        - move the mouse wheel by W\n");
+        "   -w W        - move the mouse wheel by W\n\n"
+        "You cannot mix -sSa options with -kmbxyw options.\n");
     exit(1);
 }
 
@@ -203,7 +205,11 @@ void print_string(unsigned char data[]) {
             ind = 0;
         }
         str = decode_byte(data[ind]);
-        printf("%s", str);
+        if (strlen(str) > 1) {
+            printf("<%s>", str);
+        } else {
+            printf("%s", str);
+        }
         len--;
         ind++;
     }
@@ -311,6 +317,20 @@ void compile_string(const char *str) {
         exit(1);
     }
     compile_string_data(arr, len);
+}
+
+void compile_string_key(const char *key) {
+    unsigned char b;
+
+    if (!set_pedal_type(STRING_TYPE)) {
+        fprintf(stderr, "Invalid combination of options\n");
+        usage();
+    }
+    if (!encode_key(key, &b)) {
+        fprintf(stderr, "Cannot encode key '%s'\n", key);
+        exit(1);
+    }
+    compile_string_data(&b, 1);
 }
 
 void compile_raw_string(const char *str) {
@@ -464,7 +484,7 @@ int main(int argc, char *argv[]) {
         return 0;
     }
     init_pedals();
-    while ((opt = getopt(argc, argv, "123rs:S:k:m:b:x:y:w:")) != -1) {
+    while ((opt = getopt(argc, argv, "123rs:S:a:k:m:b:x:y:w:")) != -1) {
         switch (opt) {
             case '1':
                 curr_pedal = &pd.pedals[0];
@@ -483,6 +503,9 @@ int main(int argc, char *argv[]) {
                 break;
             case 'S':
                 compile_raw_string(optarg);
+                break;
+            case 'a':
+                compile_string_key(optarg);
                 break;
             case 'k':
                 compile_key(optarg);
