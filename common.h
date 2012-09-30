@@ -26,29 +26,23 @@ THE SOFTWARE.
 #define VID 0x0C45
 #define PID 0x7403
 
-enum action {
-    NONE = -1,
-    READ,
-    STRING,
-    RAW_STRING,
-    COMBO,
-    MOUSE,
-};
-
 enum modifier {
-    INVALID = -1,
     CTRL = 1,
     SHIFT = 2,
     ALT = 4,
     WIN = 8,
-    MOUSE_LEFT = 16,
-    MOUSE_RIGHT = 32,
-    MOUSE_MIDDLE = 64,
+};
+
+enum mouse_button {
+    MOUSE_LEFT = 1,
+    MOUSE_RIGHT = 2,
+    MOUSE_MIDDLE = 4,
 };
 
 typedef unsigned char Bool;
 
-enum modifier parse_modifier(const char *arg);
+Bool parse_modifier(const char *arg, enum modifier *mod);
+Bool parse_mouse_button(const char *arg, enum mouse_button *btn);
 
 Bool encode_string(const char *str, unsigned char *arr);
 

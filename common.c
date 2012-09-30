@@ -301,24 +301,35 @@ static const keymap_entry keymap[] =
 
 #define KEYMAP_SIZE (sizeof(keymap)/sizeof(keymap_entry))
 
-enum modifier parse_modifier(const char *arg) {
+Bool parse_modifier(const char *arg, enum modifier *mod) {
     if (strcasecmp("ctrl", arg) == 0) {
-        return CTRL;
+        *mod = CTRL;
+        return 1;
     } else if (strcasecmp("alt", arg) == 0) {
-        return ALT;
+        *mod = ALT;
+        return 1;
     } else if (strcasecmp("win", arg) == 0) {
-        return WIN;
+        *mod = WIN;
+        return 1;
     } else if (strcasecmp("shift", arg) == 0) {
-        return SHIFT;
-    } else if (strcasecmp("mouse_left", arg) == 0) {
-        return MOUSE_LEFT;
-    } else if (strcasecmp("mouse_middle", arg) == 0) {
-        return MOUSE_MIDDLE;
-    } else if (strcasecmp("mouse_right", arg) == 0) {
-        return MOUSE_RIGHT;
-    } else {
-        return INVALID;
+        *mod = SHIFT;
+        return 1;
     }
+    return 0;
+}
+
+Bool parse_mouse_button(const char *arg, enum mouse_button *btn) {
+    if (strcasecmp("mouse_left", arg) == 0) {
+        *btn = MOUSE_LEFT;
+        return 1;
+    } else if (strcasecmp("mouse_middle", arg) == 0) {
+        *btn = MOUSE_MIDDLE;
+        return 1;
+    } else if (strcasecmp("mouse_right", arg) == 0) {
+        *btn = MOUSE_RIGHT;
+        return 1;
+    }
+    return 0;
 }
 
 static Bool encode_char(const char ch, unsigned char *b) {

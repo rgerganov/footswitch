@@ -33,19 +33,42 @@ libusb_context *ctx = NULL;
 libusb_device_handle *dev = NULL;
 unsigned char driver_detached = 0;
 
-const int KEYBOARD_MODS = CTRL | SHIFT | ALT | WIN;
-const int MOUSE_MODS = MOUSE_LEFT | MOUSE_MIDDLE | MOUSE_RIGHT;
+typedef struct pedal_data
+{
+    unsigned char header[8];
+    unsigned char data[48];
+    int data_len;
+} pedal_data;
 
-void usage(char *argv0) {
-    fprintf(stderr, "Usage: %s [-r] [-s <string>] [-S <raw_string>] [-k <key>] [-m <modifier>] [-x <X>] [-y <Y>] [-w <W>]\n"
-        "   -r          - read the persisted function\n"
+typedef struct pedal_protocol
+{
+    unsigned char start[8];
+    pedal_data pedals[3];
+} pedal_protocol;
+
+pedal_protocol pd = {{0}};
+pedal_data *curr_pedal = &pd.pedals[1]; // start at the second pedal
+
+// KEY and MOUSE types can be combined
+#define KEY_TYPE    1
+#define MOUSE_TYPE    2
+// STRING must be by itself
+#define STRING_TYPE    4
+
+void usage() {
+    fprintf(stderr, "Usage: footswitch [-123] [-r] [-s <string>] [-S <raw_string>] [-k <key>] [-m <modifier>] [-xyw <XYW>]\n"
+        "   -r          - read all foot switches\n"
+        "   -1          - program the first foot switch\n"
+        "   -2          - program the second foot switch (default)\n"
+        "   -3          - program the third foot switch\n"
         "   -s string   - write the specified string\n"
         "   -S rstring  - write the specified raw string (hex numbers delimited with spaces)\n"
-        "   -k key      - write the specified key; can be used with one or several -m\n"
-        "   -m modifier - ctrl|shift|alt|win|mouse_left|mouse_middle|mouse_right \n"
+        "   -k key      - write the specified key; cannot be used with -s or -S\n"
+        "   -m modifier - ctrl|shift|alt|win\n"
+        "   -b button   - mouse_left|mouse_middle|mouse_right\n"
         "   -x X        - move the mouse cursor horizontally by X pixels\n"
         "   -y Y        - move the mouse cursor vertically by Y pixels\n"
-        "   -w W        - move the mouse wheel by W\n", argv0);
+        "   -w W        - move the mouse wheel by W\n");
     exit(1);
 }
 
@@ -76,6 +99,28 @@ void init() {
     }
 }
 
+void init_pedal(pedal_data *p, int num) {
+    unsigned char default_header[8] = {0x01, 0x81, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00};
+    unsigned char default_data[8] = {0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+
+    memcpy(p->header, default_header, 8);
+    p->header[3] = num + 1;
+
+    memset(p->data, 0, sizeof(p->data));
+    memcpy(p->data, default_data, 8);
+
+    p->data_len = 8;
+}
+
+void init_pedals() {
+    unsigned char start[8] = {0x01, 0x80, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00};
+
+    memcpy(pd.start, start, 8);
+    init_pedal(&pd.pedals[0], 0);
+    init_pedal(&pd.pedals[1], 1);
+    init_pedal(&pd.pedals[2], 2);
+}
+
 void deinit() {
     int r = libusb_release_interface(dev, 1);
     if (r < 0) {
@@ -93,32 +138,10 @@ void usb_write(unsigned char data[8]) {
     if (r < 0) {
         fatal("error writing data (%s)", libusb_err(r));
     }
+    usleep(30 * 1000);
 }
 
-void write_magic_begin() {
-    unsigned char wrt1[8] = {0x01, 0x80, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00};
-    unsigned char wrt2[8] = {0x01, 0x81, 0x08, 0x01, 0x00, 0x00, 0x00, 0x00};
-    unsigned char wrt3[8] = {0x08, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-
-    usb_write(wrt1);
-    usleep(50 * 1000);
-    usb_write(wrt2);
-    usleep(50 * 1000);
-    usb_write(wrt3);
-    usleep(50 * 1000);
-}
-
-void write_magic_end() {
-    unsigned char wrt4[8] = {0x01, 0x81, 0x08, 0x03, 0x00, 0x00, 0x00, 0x00};
-    unsigned char wrt5[8] = {0x08, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-
-    usb_write(wrt4);
-    usleep(50 * 1000);
-    usb_write(wrt5);
-    usleep(50 * 1000);
-}
-
-void read_mouse(unsigned char data[]) {
+void print_mouse(unsigned char data[]) {
     int x = data[5], y = data[6], w = data[7];
     switch (data[4]) {
         case 1:
@@ -134,33 +157,22 @@ void read_mouse(unsigned char data[]) {
     x = x > 127 ? x - 256 : x;
     y = y > 127 ? y - 256 : y;
     w = w > 127 ? w - 256 : w;
-    printf("X=%d Y=%d W=%d\n", x, y, w);
+    printf("X=%d Y=%d W=%d", x, y, w);
 }
 
-void read_combo(unsigned char data[]) {
+void print_key(unsigned char data[]) {
     char combo[128] = {0};
-    if ((data[2] & 1) != 0) {
+    if ((data[2] & CTRL) != 0) {
         strcat(combo, "ctrl+");
     }
-    if ((data[2] & 2) != 0) {
+    if ((data[2] & SHIFT) != 0) {
         strcat(combo, "shift+");
     }
-    if ((data[2] & 4) != 0) {
+    if ((data[2] & ALT) != 0) {
         strcat(combo, "alt+");
     }
-    if ((data[2] & 8) != 0) {
+    if ((data[2] & WIN) != 0) {
         strcat(combo, "win+");
-    }
-    switch (data[4]) {
-        case 1:
-            strcat(combo, "mouse_left+");
-            break;
-        case 2:
-            strcat(combo, "mouse_right+");
-            break;
-        case 4:
-            strcat(combo, "mouse_middle+");
-            break;
     }
     if (data[3] != 0) {
         const char *key = decode_byte(data[3]);
@@ -171,10 +183,10 @@ void read_combo(unsigned char data[]) {
             combo[len - 1] = 0; // remove the last +
         }
     }
-    printf("%s\n", combo);
+    printf("%s", combo);
 }
 
-void read_string(unsigned char data[]) {
+void print_string(unsigned char data[]) {
     int r = 0, tr = 0, ind = 2;
     int len = data[0] - 2;
     const char *str = NULL;
@@ -195,299 +207,309 @@ void read_string(unsigned char data[]) {
         len--;
         ind++;
     }
-    printf("\n");
 }
 
-void read_usb() {
-    int r = 0, tr = 0;
-    unsigned char data[8] = {0x01, 0x82, 0x08, 0x02, 0x00, 0x00, 0x00, 0x00};
+void read_pedals() {
+    int r = 0, tr = 0, i = 0;
+    unsigned char query[8] = {0x01, 0x82, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00};
+    unsigned char response[8];
 
-    usb_write(data);
-    r = libusb_interrupt_transfer(dev, 0x82, data, 8, &tr, 500);
-    if (r < 0) {
-        fatal("error reading data (%s)", libusb_err(r));
-    }
-
-    switch (data[1]) {
-        case 1:
-        case 0x81:
-            read_combo(data);
-            break;
-        case 2:
-            read_mouse(data);
-            break;
-        case 3:
-            read_combo(data);
-            break;
-        case 4:
-            read_string(data);
-            break;
-        default:
-            fprintf(stderr, "Unknown data:\n");
-            debug_arr(data, 8);
-            return;
-    }
-}
-
-void write_raw_data(unsigned char *arr, int len) {
-    unsigned char data[8];
-    int arr_ind = 0, data_ind = 0;
-
-    write_magic_begin();
-    memset(data, 0, 8);
-    data[0] = 1;
-    data[1] = 0x81;
-    data[2] = len + 2;
-    data[3] = 2;
-    usb_write(data);
-    memset(data, 0, 8);
-    data[data_ind++] = len + 2;
-    data[data_ind++] = 4;
-    while (arr_ind < len) {
-        if (data_ind == 8) {
-            usb_write(data);
-            memset(data, 0, 8);
-            data_ind = 0;
+    for (i = 0 ; i < 3 ; i++) {
+        query[3] = i + 1;
+        usb_write(query);
+        r = libusb_interrupt_transfer(dev, 0x82, response, 8, &tr, 500);
+        if (r < 0) {
+            fatal("error reading data (%s)", libusb_err(r));
         }
-        data[data_ind++] = arr[arr_ind++];
+        printf("[switch %d]: ", i + 1);
+        switch (response[1]) {
+            case 0:
+                printf("unconfigured");
+                break;
+            case 1:
+            case 0x81:
+                print_key(response);
+                break;
+            case 2:
+                print_mouse(response);
+                break;
+            case 3:
+                print_key(response);
+                printf(" ");
+                print_mouse(response);
+                break;
+            case 4:
+                print_string(response);
+                break;
+            default:
+                fprintf(stderr, "Unknown response:\n");
+                debug_arr(response, 8);
+                return;
+        }
+        printf("\n");
     }
-    usb_write(data);
-    usleep(50 * 1000);
-    write_magic_end();
 }
 
-void write_raw_string(const char *str) {
+/**
+ * The following types are valid:
+ *   KEY_TYPE,
+ *   MOUSE_TYPE,
+ *   KEY_TYPE | MOUSE_TYPE,
+ *   STRING_TYPE
+ */
+Bool set_pedal_type(unsigned char new_type) {
+    unsigned char *curr_type = &curr_pedal->data[1];
+    // check if there is no type set (default)
+    if (*curr_type == 0) {
+        // set type and data_len
+        *curr_type = new_type;
+        if (new_type == STRING_TYPE) {
+            curr_pedal->data_len = 2;
+        }
+        return 1;
+    }
+    // type is already set, check if we can add the new type
+    switch (new_type) {
+        case STRING_TYPE:
+            return *curr_type == STRING_TYPE;
+        case KEY_TYPE:
+        case MOUSE_TYPE:
+            if (*curr_type == STRING_TYPE) {
+                return 0;
+            }
+            *curr_type |= new_type;
+            return 1;
+    }
+    return 0;
+}
+
+void compile_string_data(unsigned char *data, size_t len) {
+    if (curr_pedal->data_len + len > 40) {
+        fprintf(stderr, "The size of the accumulated string must be <= 38\n");
+        exit(1);
+    }
+    memcpy(&curr_pedal->data[curr_pedal->data_len], data, len);
+    curr_pedal->data_len += len;
+    curr_pedal->header[2] = curr_pedal->data_len;
+    curr_pedal->data[0] = curr_pedal->data_len;
+}
+
+void compile_string(const char *str) {
+    size_t len = strlen(str);
+    unsigned char arr[40] = {0};
+
+    if (!set_pedal_type(STRING_TYPE)) {
+        fprintf(stderr, "Invalid combination of options\n");
+        usage();
+    }
+    if (len > 38) {
+        fprintf(stderr, "The size of each string must be <= 38\n");
+        exit(1);
+    }
+    if (!encode_string(str, arr)) {
+        fprintf(stderr, "Cannot encode string: '%s'\n", str);
+        exit(1);
+    }
+    compile_string_data(arr, len);
+}
+
+void compile_raw_string(const char *str) {
     unsigned char arr[40];
     int ind = 0;
-    char *tok = strtok((char *)str, " ,");
+    char *tok = NULL;
+
+    if (!set_pedal_type(STRING_TYPE)) {
+        fprintf(stderr, "Invalid combination of options\n");
+        usage();
+    }
+    tok = strtok((char *)str, " ,");
     while (tok != NULL && ind < 38) {
         int val;
         if (sscanf(tok, "%x", &val) == 1) {
             arr[ind++] = val;
         } else {
             fprintf(stderr, "'%s' is invalid hex number\n", tok);
-            return;
+            exit(1);
         }
         tok = strtok(NULL, " ,");
     }
     if (tok != NULL) {
-        fprintf(stderr, "WARN: input string is truncated because it's too long\n");
+        fprintf(stderr, "The size of each string must be <= 38\n");
+        exit(1);
     }
-    write_raw_data(arr, ind);
-    printf("success\n");
+    compile_string_data(arr, ind);
 }
 
-void write_string(const char *str) {
-    unsigned char arr[40];
-    size_t len = strlen(str);
-
-    if (len > 38) {
-        fprintf(stderr, "The size of the string must be <= 38\n");
-        return;
-    }
-    if (!encode_string(str, arr)) {
-        fprintf(stderr, "Cannot encode string: '%s'\n", str);
-        return;
-    }
-    write_raw_data(arr, len);
-    printf("success\n");
-}
-
-void write_combo(const char *key, int modifiers) {
+void compile_key(const char *key) {
     unsigned char b = 0;
-    unsigned char data[8] = {0x01, 0x81, 0x08, 0x02, 0x00, 0x00, 0x00, 0x00};
-    //printf("write combo '%s', mods: %d\n", key, modifiers);
-    if (key != NULL) {
-        if (!encode_key(key, &b)) {
-            fprintf(stderr, "Cannot encode key '%s'\n", key);
-            return;
+
+    if (!set_pedal_type(KEY_TYPE)) {
+        fprintf(stderr, "Invalid combination of options\n");
+        usage();
+    }
+    if (!encode_key(key, &b)) {
+        fprintf(stderr, "Cannot encode key '%s'\n", key);
+        exit(1);
+    }
+    curr_pedal->data[3] = b;
+}
+
+void compile_modifier(const char *mod_str) {
+    enum modifier mod;
+
+    if (!parse_modifier(mod_str, &mod)) {
+        fprintf(stderr, "Invlalid modifier '%s'\n", mod_str);
+        exit(1);
+    }
+    if (!set_pedal_type(KEY_TYPE)) {
+        fprintf(stderr, "Invalid combination of options\n");
+        usage();
+    }
+    curr_pedal->data[2] |= mod;
+}
+
+void compile_mouse_button(const char *btn_str) {
+    enum mouse_button btn;
+
+    if (!parse_mouse_button(btn_str, &btn)) {
+        fprintf(stderr, "Invalid mouse button '%s'\n", btn_str);
+        exit(1);
+    }
+    if (!set_pedal_type(MOUSE_TYPE)) {
+        fprintf(stderr, "Invalid combination of options\n");
+        usage();
+    }
+    curr_pedal->data[4] = btn;
+}
+
+void compile_mouse_xyw(const char *mx, const char *my, const char *mw) {
+    if (!set_pedal_type(MOUSE_TYPE)) {
+        fprintf(stderr, "Invalid combination of options\n");
+        usage();
+    }
+    if (mx) {
+        int x = atoi(mx);
+        if (x < -128 || x > 127) {
+            fprintf(stderr, "'x' must be in [-128, 127]\n");
+            exit(1);
         }
+        x = x < 0 ? 256 + x : x;
+        curr_pedal->data[5] = x;
     }
-    write_magic_begin();
-    usb_write(data);
-    memset(data, 0, 8);
-    data[0] = 8;
-    data[1] = 1;
-    if (modifiers & MOUSE_MODS) {
-        data[1] |= 2;
+    if (my) {
+        int y = atoi(my);
+        if (y < -128 || y > 127) {
+            fprintf(stderr, "'y' must be in [-128, 127]\n");
+            exit(1);
+        }
+        y = y < 0 ? 256 + y : y;
+        curr_pedal->data[6] = y;
     }
-    data[2] = modifiers & KEYBOARD_MODS;
-    data[3] = b;
-    if (modifiers & MOUSE_LEFT) {
-        data[4] = 1;
-    } else if (modifiers & MOUSE_RIGHT) {
-        data[4] = 2;
-    } else if (modifiers & MOUSE_MIDDLE) {
-        data[4] = 4;
+    if (mw) {
+        int w = atoi(mw);
+        if (w < -128 || w > 127) {
+            fprintf(stderr, "'w' must be in [-128, 127]\n");
+            exit(1);
+        }
+        w = w < 0 ? 256 + w : w;
+        curr_pedal->data[7] = w;
     }
-    //debug_arr(data, 8);
-    usb_write(data);
-    write_magic_end();
-    printf("success\n");
 }
 
-void write_mouse(int modifiers, const char *m_x, const char *m_y, const char *m_w) {
-    unsigned char data[8] = {0x01, 0x81, 0x08, 0x02, 0x00, 0x00, 0x00, 0x00};
-    int x, y, w;
+void write_pedal(pedal_data *pedal) {
+    unsigned char data[8];
+    int arr_ind = 0, data_ind = 0;
 
-    x = m_x ? atoi(m_x) : 0;
-    y = m_y ? atoi(m_y) : 0;
-    w = m_w ? atoi(m_w) : 0;
-
-    if (x < -128 || x > 127) {
-        fprintf(stderr, "'x' must be in [-128, 127]\n");
-        return;
-    }
-    if (y < -128 || y > 127) {
-        fprintf(stderr, "'y' must be in [-128, 127]\n");
-        return;
-    }
-    if (w < -128 || w > 127) {
-        fprintf(stderr, "'w' must be in [-128, 127]\n");
-        return;
-    }
-    x = x < 0 ? 256 + x : x;
-    y = y < 0 ? 256 + y : y;
-    w = w < 0 ? 256 + w : w;
-
-    write_magic_begin();
-    usb_write(data);
+    usb_write(pedal->header);
     memset(data, 0, 8);
-    data[0] = 8;
-    data[1] = 2;
-    if (modifiers & MOUSE_LEFT) {
-        data[4] = 1;
-    } else if (modifiers & MOUSE_RIGHT) {
-        data[4] = 2;
-    } else if (modifiers & MOUSE_MIDDLE) {
-        data[4] = 4;
+    while (arr_ind < pedal->data_len) {
+        if (data_ind == 8) {
+            usb_write(data);
+            memset(data, 0, 8);
+            data_ind = 0;
+        }
+        data[data_ind++] = pedal->data[arr_ind++];
     }
-    data[5] = x;
-    data[6] = y;
-    data[7] = w;
     usb_write(data);
-    write_magic_end();
-    printf("success\n");
 }
 
+void write_pedals() {
+    /*
+    int i = 0;
+    printf("start: ");
+    debug_arr(pd.start, 8);
+    for (i = 0 ; i < 3 ; i++) {
+        printf("pedal %d header: ", i+1);
+        debug_arr(pd.pedals[i].header, 8);
+        printf("pedal %d data: ", i+1);
+        debug_arr(pd.pedals[i].data, pd.pedals[i].data_len);
+    }
+    */
+    usb_write(pd.start);
+    write_pedal(&pd.pedals[0]);
+    write_pedal(&pd.pedals[1]);
+    write_pedal(&pd.pedals[2]);
+}
 
 int main(int argc, char *argv[]) {
     int opt;
-    enum action selected = NONE;
-    enum modifier mod = INVALID;
-    const char *string = NULL;
-    const char *raw_string = NULL;
-    const char *key = NULL;
-    const char *m_x = NULL, *m_y = NULL, *m_w = NULL;
-    int modifiers = 0;
+
     if (argc == 1) {
         usage(argv[0]);
     }
-    while ((opt = getopt(argc, argv, "rs:S:k:m:x:y:w:")) != -1) {
+    if (argc == 2 && strcmp(argv[1], "-r") == 0) {
+        init();
+        read_pedals();
+        deinit();
+        return 0;
+    }
+    init_pedals();
+    while ((opt = getopt(argc, argv, "123rs:S:k:m:b:x:y:w:")) != -1) {
         switch (opt) {
-            case 'r':
-                if (selected != NONE) {
-                    usage(argv[0]);
-                }
-                selected = READ;
+            case '1':
+                curr_pedal = &pd.pedals[0];
                 break;
+            case '2':
+                curr_pedal = &pd.pedals[1];
+                break;
+            case '3':
+                curr_pedal = &pd.pedals[2];
+                break;
+            case 'r':
+                fprintf(stderr, "Cannot use -r with other options\n");
+                return 1;
             case 's':
-                if (selected != NONE) {
-                    usage(argv[0]);
-                }
-                selected = STRING;
-                string = optarg;
+                compile_string(optarg);
                 break;
             case 'S':
-                if (selected != NONE) {
-                    usage(argv[0]);
-                }
-                selected = RAW_STRING;
-                raw_string = optarg;
+                compile_raw_string(optarg);
                 break;
             case 'k':
-                if (selected != NONE && selected != COMBO) {
-                    usage(argv[0]);
-                }
-                if (key != NULL) {
-                    usage(argv[0]);
-                }
-                selected = COMBO;
-                key = optarg;
+                compile_key(optarg);
                 break;
             case 'm':
-                if (selected != NONE && selected != COMBO && selected != MOUSE) {
-                    usage(argv[0]);
-                }
-                mod = parse_modifier(optarg);
-                if (mod == INVALID) {
-                    fprintf(stderr, "Invlalid modifier '%s'\n", optarg);
-                    return 1;
-                }
-                if (KEYBOARD_MODS & mod) {
-                    selected = COMBO;
-                }
-                modifiers |= mod;
+                compile_modifier(optarg);
+                break;
+            case 'b':
+                compile_mouse_button(optarg);
                 break;
             case 'x':
-                if (selected != NONE && selected != MOUSE) {
-                    usage(argv[0]);
-                }
-                if (m_x != NULL || modifiers & KEYBOARD_MODS) {
-                    usage(argv[0]);
-                }
-                selected = MOUSE;
-                m_x = optarg;
+                compile_mouse_xyw(optarg, NULL, NULL);
                 break;
             case 'y':
-                if (selected != NONE && selected != MOUSE) {
-                    usage(argv[0]);
-                }
-                if (m_y != NULL || modifiers & KEYBOARD_MODS) {
-                    usage(argv[0]);
-                }
-                selected = MOUSE;
-                m_y = optarg;
+                compile_mouse_xyw(NULL, optarg, NULL);
                 break;
             case 'w':
-                if (selected != NONE && selected != MOUSE) {
-                    usage(argv[0]);
-                }
-                if (m_w != NULL || modifiers & KEYBOARD_MODS) {
-                    usage(argv[0]);
-                }
-                selected = MOUSE;
-                m_w = optarg;
+                compile_mouse_xyw(NULL, NULL, optarg);
                 break;
             default:
-                usage(argv[0]);
+                usage();
                 break;
         }
     }
     init();
-    if (selected == NONE && (modifiers & MOUSE_MODS) != 0) {
-        selected = MOUSE;
-    }
-    switch (selected) {
-        case NONE:
-            usage(argv[0]);
-            break;
-        case READ:
-            read_usb();
-            break;
-        case STRING:
-            write_string(string);
-            break;
-        case RAW_STRING:
-            write_raw_string(raw_string);
-            break;
-        case COMBO:
-            write_combo(key, modifiers);
-            break;
-        case MOUSE:
-            write_mouse(modifiers, m_x, m_y, m_w);
-            break;
-    }
+    write_pedals();
     deinit();
     return 0;
 }
+
