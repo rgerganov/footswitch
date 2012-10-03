@@ -1,0 +1,5 @@
+ATTR{product}=="FootSwitchV1.1"\
+MODE:="0666"\
+GROUP="hid"\
+RUN+="keymap $name 0x70066 screenlock"\
+SYMLINK+="footswitch"
