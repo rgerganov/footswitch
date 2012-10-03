@@ -56,11 +56,11 @@ pedal_data *curr_pedal = &pd.pedals[1]; // start at the second pedal
 #define STRING_TYPE    4
 
 void usage() {
-    fprintf(stderr, "Usage: footswitch [-123] [-r] [-s <string>] [-S <raw_string>] [-ak <key>] [-m <modifier>] [-b <mouse_btn>] [-xyw <XYW>]\n"
-        "   -r          - read all foot switches\n"
-        "   -1          - program the first foot switch\n"
-        "   -2          - program the second foot switch (default)\n"
-        "   -3          - program the third foot switch\n"
+    fprintf(stderr, "Usage: footswitch [-123] [-r] [-s <string>] [-S <raw_string>] [-ak <key>] [-m <modifier>] [-b <button>] [-xyw <XYW>]\n"
+        "   -r          - read all pedals\n"
+        "   -1          - program the first pedal\n"
+        "   -2          - program the second pedal (default)\n"
+        "   -3          - program the third pedal\n"
         "   -s string   - append the specified string\n"
         "   -S rstring  - append the specified raw string (hex numbers delimited with spaces)\n"
         "   -a key      - append the specified key\n"
@@ -70,7 +70,7 @@ void usage() {
         "   -x X        - move the mouse cursor horizontally by X pixels\n"
         "   -y Y        - move the mouse cursor vertically by Y pixels\n"
         "   -w W        - move the mouse wheel by W\n\n"
-        "You cannot mix -sSa options with -kmbxyw options.\n");
+        "You cannot mix -sSa options with -kmbxyw options for one and the same pedal\n");
     exit(1);
 }
 
