@@ -2,7 +2,7 @@ INSTALL = /usr/bin/install -c
 INSTALLDATA = /usr/bin/install -c -m 644
 PROGNAME = footswitch
 CFLAGS = -Wall
-LDFLAGS = -lusb-1.0
+LDFLAGS = -lhidapi
 
 all: $(PROGNAME)
 
