@@ -11,9 +11,17 @@ The same kind of foot switches are used for building the popular [VIM Clutch][2]
 Building
 --------
 
-The program is using the [libusb-1.0][3] library and should work on all major platforms. To build on Debian/Ubuntu:
+The program is using the [hidapi][3] library and should work on Linux and OSX. To build on Linux:
 
-    sudo apt-get install libusb-1.0-0-dev
+    sudo apt-get install libhidapi-dev
+    git clone https://github.com/rgerganov/footswitch.git
+    cd footswitch
+    make
+    sudo make install
+
+To build on OSX:
+
+    brew install hidapi
     git clone https://github.com/rgerganov/footswitch.git
     cd footswitch
     make
@@ -70,10 +78,15 @@ Examples
         second pedal to move mouse wheel 15 units up;
         third pedal to move the mouse cursor 10 pixels right
 
-Authors
+Author
 -------
-[Radoslav Gerganov](mailto:rgerganov@gmail.com) and [Daniel Manjarres](mailto:danmanj@gmail.com)
+[Radoslav Gerganov](mailto:rgerganov@gmail.com)
+
+Contributors
+-------
+* [Daniel Manjarres](mailto:danmanj@gmail.com)
+* Meng Zhang (wsxiaoys)
 
 [1]: http://www.pcsensor.com/index.php?_a=viewCat&catId=2
 [2]: https://github.com/alevchuk/vim-clutch
-[3]: http://www.libusb.org/
+[3]: http://www.signal11.us/oss/hidapi/

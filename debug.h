@@ -28,9 +28,6 @@ THE SOFTWARE.
     exit(1); \
     }
 
-// according to the docs there should be libusb_error_name() but it is missing
-char* libusb_err(int rc);
-
 void debug_arr(unsigned char data[], int length);
 
 #endif
