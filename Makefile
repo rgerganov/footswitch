@@ -23,7 +23,7 @@ install: all
 	$(INSTALLDATA) 19-footswitch.rules /etc/udev/rules.d
 
 mac: $(PROGNAME).c common.h common.c debug.h debug.c
-	$(CC) -I$(MAC_DIR)/include -L$(MAC_DIR)/lib $(PROGNAME).c common.c debug.c -o $(PROGNAME) $(CFLAGS) $(LDFLAGS)
+	$(CC) -I$(MAC_DIR)/include -L$(MAC_DIR)/lib $(PROGNAME).c common.c debug.c -o $(PROGNAME) $(CFLAGS) -Ddarwin $(LDFLAGS)
 
 install-mac: mac
 	$(INSTALL) $(PROGNAME) $(MAC_INSTALL_DIR)

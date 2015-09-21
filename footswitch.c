@@ -95,10 +95,12 @@ void init() {
         }
         driver_detached = 1;
     }
-    r = libusb_claim_interface(dev, 1);
-    if (r < 0) {
-        fatal("cannot claim interface, error: %s", libusb_err(r));
-    }
+    #ifndef darwin
+        r = libusb_claim_interface(dev, 1);
+        if (r < 0) {
+            fatal("cannot claim interface, error: %s", libusb_err(r));
+        }
+    #endif
 }
 
 void init_pedal(pedal_data *p, int num) {
@@ -124,10 +126,12 @@ void init_pedals() {
 }
 
 void deinit() {
-    int r = libusb_release_interface(dev, 1);
-    if (r < 0) {
-        fatal("cannot release interface, error: %s", libusb_err(r));
-    }
+    #ifndef darwin
+        int r = libusb_release_interface(dev, 1);
+        if (r < 0) {
+            fatal("cannot release interface, error: %s", libusb_err(r));
+        }
+    #endif
     if (driver_detached) {
         libusb_attach_kernel_driver(dev, 1);
     }
