@@ -25,13 +25,11 @@ THE SOFTWARE.
 #include <stdlib.h>
 #include <errno.h>
 #include <unistd.h>
-#include <libusb-1.0/libusb.h>
+#include <hidapi/hidapi.h>
 #include "common.h"
 #include "debug.h"
 
-libusb_context *ctx = NULL;
-libusb_device_handle *dev = NULL;
-unsigned char driver_detached = 0;
+hid_device *dev = NULL;
 
 typedef struct pedal_data
 {
@@ -75,29 +73,10 @@ void usage() {
 }
 
 void init() {
-    int r = libusb_init(&ctx);
-    if (r < 0) {
-        fatal("cannot initialize libusb");
-    }
-    libusb_set_debug(ctx, 3);
-    dev = libusb_open_device_with_vid_pid(ctx, VID, PID);
+    hid_init();
+    dev = hid_open(VID, PID, NULL);
     if (dev == NULL) {
         fatal("cannot find footswitch with VID:PID=%x:%x", VID, PID);
-    }
-    r = libusb_kernel_driver_active(dev, 1);
-    if (r < 0) {
-        fatal("check if driver is active, error: %s", libusb_err(r));
-    }
-    if (r == 1) {
-        r = libusb_detach_kernel_driver(dev, 1);
-        if (r < 0) {
-            fatal("cannot detach kernel driver, error: %s", libusb_err(r));
-        }
-        driver_detached = 1;
-    }
-    r = libusb_claim_interface(dev, 1);
-    if (r < 0) {
-        fatal("cannot claim interface, error: %s", libusb_err(r));
     }
 }
 
@@ -124,21 +103,14 @@ void init_pedals() {
 }
 
 void deinit() {
-    int r = libusb_release_interface(dev, 1);
-    if (r < 0) {
-        fatal("cannot release interface, error: %s", libusb_err(r));
-    }
-    if (driver_detached) {
-        libusb_attach_kernel_driver(dev, 1);
-    }
-    libusb_close(dev);
-    libusb_exit(ctx);
+    hid_close(dev);
+    hid_exit();
 }
 
 void usb_write(unsigned char data[8]) {
-    int r = libusb_control_transfer(dev, 0x21, 0x09, 0x200, 0x1, data, 8, 500);
+    int r = hid_write(dev, data, 8);
     if (r < 0) {
-        fatal("error writing data (%s)", libusb_err(r));
+        fatal("error writing data (%ls)", hid_error(dev));
     }
     usleep(30 * 1000);
 }
@@ -195,9 +167,9 @@ void print_string(unsigned char data[]) {
 
     while (len > 0) {
         if (ind == 8) {
-            r = libusb_interrupt_transfer(dev, 0x82, data, 8, &tr, 500);
+            r = hid_read(dev, data, 8);
             if (r < 0) {
-                fatal("error reading data (%s)", libusb_err(r));
+                fatal("error reading data (%ls)", hid_error(dev));
             }
             if (tr != 8) {
                 fatal("expected 8 bytes, received: %d", tr);
@@ -216,16 +188,16 @@ void print_string(unsigned char data[]) {
 }
 
 void read_pedals() {
-    int r = 0, tr = 0, i = 0;
+    int r = 0, i = 0;
     unsigned char query[8] = {0x01, 0x82, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00};
     unsigned char response[8];
 
     for (i = 0 ; i < 3 ; i++) {
         query[3] = i + 1;
         usb_write(query);
-        r = libusb_interrupt_transfer(dev, 0x82, response, 8, &tr, 500);
+        r = hid_read(dev, response, 8);
         if (r < 0) {
-            fatal("error reading data (%s)", libusb_err(r));
+            fatal("error reading data (%ls)", hid_error(dev));
         }
         printf("[switch %d]: ", i + 1);
         switch (response[1]) {
