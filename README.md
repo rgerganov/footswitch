@@ -11,13 +11,28 @@ The same kind of foot switches are used for building the popular [VIM Clutch][2]
 Building
 --------
 
-The program is using the [libusb-1.0][3] library and should work on all major platforms. To build on Debian/Ubuntu:
+The program is using the [libusb-1.0][3] library and should work on all major platforms.
 
-    sudo apt-get install libusb-1.0-0-dev
-    git clone https://github.com/rgerganov/footswitch.git
-    cd footswitch
-    make
-    sudo make install
+* To build on Debian/Ubuntu:
+
+        sudo apt-get install libusb-1.0-0-dev
+        git clone https://github.com/rgerganov/footswitch.git
+        cd footswitch
+        make
+        sudo make install
+
+* To build and install on Mac OS X:
+    * Using macports:
+        * `sudo port install libusb`
+        * `git clone https://github.com/surajrav/footswitch.git`
+        * `cd footswitch`
+        * `sudo make install-mac`
+
+    * Using homebrew:
+        * `brew install libusb`
+        * `git clone https://github.com/surajrav/footswitch.git`
+        * `cd footswitch`
+        * `sudo MAC_DIR=/usr/local make install-mac`
 
 Usage
 -----
@@ -72,7 +87,9 @@ Examples
 
 Authors
 -------
-[Radoslav Gerganov](mailto:rgerganov@gmail.com) and [Daniel Manjarres](mailto:danmanj@gmail.com)
+[Radoslav Gerganov](mailto:rgerganov@gmail.com)
+[Daniel Manjarres](mailto:danmanj@gmail.com)
+[Suraj Ravichandran](mailto:surajravi@gmail.com)
 
 [1]: http://www.pcsensor.com/index.php?_a=viewCat&catId=2
 [2]: https://github.com/alevchuk/vim-clutch
