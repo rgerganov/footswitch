@@ -475,7 +475,7 @@ int main(int argc, char *argv[]) {
     int opt;
 
     if (argc == 1) {
-        usage(argv[0]);
+        usage();
     }
     if (argc == 2 && strcmp(argv[1], "-r") == 0) {
         init();
