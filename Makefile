@@ -1,8 +1,19 @@
 INSTALL = /usr/bin/install -c
 INSTALLDATA = /usr/bin/install -c -m 644
 PROGNAME = footswitch
-CFLAGS = -g -Wall
+CFLAGS = -Wall
 LDFLAGS = -lhidapi-libusb
+UNAME := $(shell uname)
+ifeq ($(UNAME), Darwin)
+	CFLAGS += -DOSX
+	LDFLAGS = -lhidapi
+else
+	ifeq ($(UNAME), Linux)
+		LDFLAGS = `pkg-config hidapi-libusb --libs`
+	else
+		LDFLAGS = -lhidapi
+	endif
+endif
 
 all: $(PROGNAME)
 

@@ -76,6 +76,9 @@ void init() {
     struct hid_device_info *info = NULL, *ptr = NULL;
 
     hid_init();
+#ifdef OSX
+    dev = hid_open(VID, PID, NULL);
+#else
     info = hid_enumerate(VID, PID);
     ptr = info;
     while (ptr != NULL) {
@@ -86,6 +89,7 @@ void init() {
         ptr = ptr->next;
     }
     hid_free_enumeration(info);
+#endif
     if (dev == NULL) {
         fatal("cannot find footswitch with VID:PID=%x:%x", VID, PID);
     }
