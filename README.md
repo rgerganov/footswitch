@@ -83,8 +83,8 @@ Author
 
 Contributors
 -------
-[Daniel Manjarres](mailto:danmanj@gmail.com)
-Meng Zhang (wsxiaoys)
+* [Daniel Manjarres](mailto:danmanj@gmail.com)
+* Meng Zhang (wsxiaoys)
 
 [1]: http://www.pcsensor.com/index.php?_a=viewCat&catId=2
 [2]: https://github.com/alevchuk/vim-clutch
