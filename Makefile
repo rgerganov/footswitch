@@ -22,7 +22,9 @@ $(PROGNAME): $(PROGNAME).c common.h common.c debug.h debug.c
 
 install: all
 	$(INSTALL) $(PROGNAME) /usr/bin
+ifeq ($(UNAME), Linux)
 	$(INSTALLDATA) 19-footswitch.rules /etc/udev/rules.d
+endif
 
 clean:
 	rm -f $(PROGNAME) *.o
