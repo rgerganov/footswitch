@@ -73,12 +73,12 @@ void usage() {
 }
 
 void init() {
-    struct hid_device_info *info = NULL, *ptr = NULL;
-
-    hid_init();
 #ifdef OSX
+    hid_init();
     dev = hid_open(VID, PID, NULL);
 #else
+    struct hid_device_info *info = NULL, *ptr = NULL;
+    hid_init();
     info = hid_enumerate(VID, PID);
     ptr = info;
     while (ptr != NULL) {
