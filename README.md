@@ -25,6 +25,7 @@ To build on OSX:
     git clone https://github.com/rgerganov/footswitch.git
     cd footswitch
     make
+    sudo make install
 
 Usage
 -----
