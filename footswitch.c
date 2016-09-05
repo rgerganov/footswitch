@@ -25,7 +25,7 @@ THE SOFTWARE.
 #include <stdlib.h>
 #include <errno.h>
 #include <unistd.h>
-#include <hidapi/hidapi.h>
+#include <hidapi.h>
 #include "common.h"
 #include "debug.h"
 

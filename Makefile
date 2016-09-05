@@ -4,11 +4,12 @@ PROGNAME = footswitch
 CFLAGS = -Wall
 UNAME := $(shell uname)
 ifeq ($(UNAME), Darwin)
-	CFLAGS += -DOSX
-	LDFLAGS = -lhidapi
+	CFLAGS += -DOSX $(shell pkg-config --cflags hidapi)
+	LDFLAGS = $(shell pkg-config --libs hidapi)
 else
 	ifeq ($(UNAME), Linux)
-		LDFLAGS = `pkg-config hidapi-libusb --libs`
+		CFLAGS += $(shell pkg-config --cflags hidapi-libusb)
+		LDFLAGS = $(shell pkg-config --libs hidapi-libusb)
 	else
 		LDFLAGS = -lhidapi
 	endif
