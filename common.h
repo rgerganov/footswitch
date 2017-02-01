@@ -24,7 +24,8 @@ THE SOFTWARE.
 
 
 #define VID 0x0C45
-#define PID 0x7403
+#define PID3 0x7403
+#define PID4 0x7404
 
 enum modifier {
     CTRL = 1,
