@@ -72,14 +72,14 @@ void usage() {
     exit(1);
 }
 
-void init() {
+void init_pid(unsigned short pid) {
 #ifdef OSX
     hid_init();
-    dev = hid_open(VID, PID, NULL);
+    dev = hid_open(VID, pid, NULL);
 #else
     struct hid_device_info *info = NULL, *ptr = NULL;
     hid_init();
-    info = hid_enumerate(VID, PID);
+    info = hid_enumerate(VID, pid);
     ptr = info;
     while (ptr != NULL) {
         if (ptr->interface_number == 1) {
@@ -90,8 +90,15 @@ void init() {
     }
     hid_free_enumeration(info);
 #endif
+}
+
+void init() {
+    init_pid(PID3);
     if (dev == NULL) {
-        fatal("cannot find footswitch with VID:PID=%x:%x", VID, PID);
+        init_pid(PID4);
+    }
+    if (dev == NULL) {
+        fatal("Cannot find footswitch with VID:PID=%x:%x or VID:PID=%x:%x", VID, PID3, VID, PID4);
     }
 }
 
@@ -453,6 +460,7 @@ void write_pedals() {
     }
     */
     usb_write(pd.start);
+    usleep(1000*1000);
     write_pedal(&pd.pedals[0]);
     write_pedal(&pd.pedals[1]);
     write_pedal(&pd.pedals[2]);
