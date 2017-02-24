@@ -31,6 +31,8 @@ To build on OSX:
 
 Usage
 -----
+Run footswitch either with `sudo` or as the superuser (`su`).
+
     footswitch [-123] [-r] [-s <string>] [-S <raw_string>] [-ak <key>] [-m <modifier>] [-b <button>] [-xyw <XYW>]
        -r          - read all pedals
        -1          - program the first pedal
