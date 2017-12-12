@@ -22,11 +22,6 @@ THE SOFTWARE.
 #ifndef __COMMON_H__
 #define __COMMON_H__
 
-
-#define VID 0x0C45
-#define PID3 0x7403
-#define PID4 0x7404
-
 enum modifier {
     CTRL = 1,
     SHIFT = 2,

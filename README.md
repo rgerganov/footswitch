@@ -3,10 +3,13 @@
 Footswitch
 ----------
 
-Command line utility for programming foot switches sold by [PCsensor][1]. It works for both single pedal devices and three pedal devices. All supported devices have `vendorId:productId` = `0c45:7403` and can be listed with `lsusb`:
+Command line utility for programming foot switches sold by [PCsensor][1] and others. It works for both single pedal devices and three pedal devices. The current list of support combinations of `vendorId:productId` is this:
 
-    $ lsusb -d 0c45:7403
-    Bus 002 Device 051: ID 0c45:7403 Microdia 
+ * `0c45:7403`
+ * `0c45:7404`
+ * `413d:2107`
+
+You can find your `vendorId:productId` using the `lsusb` command on Linux.
 
 The same kind of foot switches are used for building the popular [VIM Clutch][2].
 

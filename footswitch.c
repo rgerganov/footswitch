@@ -72,14 +72,14 @@ void usage() {
     exit(1);
 }
 
-void init_pid(unsigned short pid) {
+void init_pid(unsigned short vid, unsigned short pid) {
 #ifdef OSX
     hid_init();
-    dev = hid_open(VID, pid, NULL);
+    dev = hid_open(vid, pid, NULL);
 #else
     struct hid_device_info *info = NULL, *ptr = NULL;
     hid_init();
-    info = hid_enumerate(VID, pid);
+    info = hid_enumerate(vid, pid);
     ptr = info;
     while (ptr != NULL) {
         if (ptr->interface_number == 1) {
@@ -93,12 +93,20 @@ void init_pid(unsigned short pid) {
 }
 
 void init() {
-    init_pid(PID3);
-    if (dev == NULL) {
-        init_pid(PID4);
+    unsigned short vid_pid[][2] = {
+        {0x0c45, 0x7403},
+        {0x0c45, 0x7404},
+        {0x413d, 0x2107},
+    };
+    int i = 0;
+    for (i = 0 ; i < sizeof(vid_pid) / sizeof(vid_pid[0]) ; i++) {
+        init_pid(vid_pid[i][0], vid_pid[i][1]);
+        if (dev != NULL) {
+            break;
+        }
     }
     if (dev == NULL) {
-        fatal("Cannot find footswitch with VID:PID=%x:%x or VID:PID=%x:%x", VID, PID3, VID, PID4);
+        fatal("Cannot find footswitch with one of the supported VID:PID");
     }
 }
 
