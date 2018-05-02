@@ -25,7 +25,7 @@ THE SOFTWARE.
 void debug_arr(unsigned char data[], int length) {
     int i;
     for (i = 0 ; i < length ; i++) {
-        printf("%3X", data[i]);
+        printf("%02x ", data[i]);
     }
     printf("\n");
 }

@@ -33,6 +33,7 @@ enum mouse_button {
     MOUSE_LEFT = 1,
     MOUSE_RIGHT = 2,
     MOUSE_MIDDLE = 4,
+    MOUSE_DOUBLE = 8,
 };
 
 typedef unsigned char Bool;
