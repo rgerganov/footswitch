@@ -1,6 +1,5 @@
 INSTALL = /usr/bin/install -c
 INSTALLDATA = /usr/bin/install -c -m 644
-PROGNAME = footswitch
 CFLAGS = -Wall
 UNAME := $(shell uname)
 ifeq ($(UNAME), Darwin)
@@ -15,10 +14,9 @@ else
 	endif
 endif
 
-all: $(PROGNAME)
-
-$(PROGNAME): $(PROGNAME).c common.h common.c debug.h debug.c
-	$(CC) $(PROGNAME).c common.c debug.c -o $(PROGNAME) $(CFLAGS) $(LDFLAGS)
+all: scythe.c footswitch.c common.h common.c debug.h debug.c
+	$(CC) footswitch.c common.c debug.c -o footswitch $(CFLAGS) $(LDFLAGS)
+	$(CC) scythe.c common.c debug.c -o scythe $(CFLAGS) $(LDFLAGS)
 
 install: all
 	$(INSTALL) $(PROGNAME) /usr/local/bin
@@ -27,5 +25,5 @@ ifeq ($(UNAME), Linux)
 endif
 
 clean:
-	rm -f $(PROGNAME) *.o
+	rm -f scythe footswitch *.o
 

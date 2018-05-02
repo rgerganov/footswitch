@@ -340,6 +340,9 @@ Bool parse_mouse_button(const char *arg, enum mouse_button *btn) {
     } else if (strcasecmp("mouse_right", arg) == 0) {
         *btn = MOUSE_RIGHT;
         return 1;
+    } else if (strcasecmp("mouse_double", arg) == 0) {
+        *btn = MOUSE_DOUBLE;
+        return 1;
     }
     return 0;
 }

@@ -3,20 +3,20 @@
 Footswitch
 ----------
 
-Command line utility for programming foot switches sold by [PCsensor][1] and others. It works for both single pedal devices and three pedal devices. The current list of support combinations of `vendorId:productId` is this:
+Command line utlities for programming [PCsensor][1] and Scythe foot switches. There is support for both single pedal devices and three pedal devices. Use the `footswitch` binary for the following combinations of `vendorId:productId`:
 
  * `0c45:7403`
  * `0c45:7404`
  * `413d:2107`
 
-You can find your `vendorId:productId` using the `lsusb` command on Linux.
+Scythe switches with `vendorId:productId`=`0426:3011` can be programmed with the `scythe` binary. You can find the `vendorId` and `productId` of your device using the `lsusb` command on Linux.
 
 The same kind of foot switches are used for building the popular [VIM Clutch][2].
 
 Building
 --------
 
-The program is using the [hidapi][3] library and should work on Linux and OSX. To build on Linux:
+The programs are using the [hidapi][3] library and should work on Linux and OSX. To build on Linux:
 
     sudo apt-get install libhidapi-dev
     git clone https://github.com/rgerganov/footswitch.git
@@ -50,8 +50,20 @@ Usage
        -w W        - move the mouse wheel by W
 
     You cannot mix -sSa options with -kmbxyw options for one and the same pedal
+_
 
-Examples
+    scythe [-123] [-r] [-a <key>] [-m <modifier>] [-b <button>]
+       -r          - read all pedals
+       -1          - program the first pedal
+       -2          - program the second pedal (default)
+       -3          - program the third pedal
+       -a key      - append the specified key
+       -m modifier - ctrl|shift|alt|win
+       -b button   - mouse_left|mouse_double|mouse_right
+
+    You cannot mix -a and -m options with -b option for one and the same pedal
+
+Examples for PCsensor
 --------
     footswitch -r
         read the persisted function in each pedal and print it on the console
@@ -82,6 +94,15 @@ Examples
         program first pedal to move the mouse cursor 10 pixels left;
         second pedal to move mouse wheel 15 units up;
         third pedal to move the mouse cursor 10 pixels right
+
+Examples for Scythe
+--------
+    scythe -r
+        read the persisted function in each pedal and print it on the console
+    scythe -1 -a a -2 -a b -3 -a c
+        program the first pedal to print 'a', second pedal to print 'b' and third pedal to print 'c'
+    scythe -1 -m ctrl -a h -a o -2 -m alt -a f4 -3 -b mouse_double
+        program the first pedal as Ctrl+h+o, the second pedal as Alt+F4 and the third pedal as double click
 
 Author
 -------
