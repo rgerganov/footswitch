@@ -63,7 +63,7 @@ void init()
     hid_init();
     dev = hid_open(0x0426, 0x3011, NULL);
     if (dev == NULL) {
-        fatal("Cannot find Scythe pedal with VID:PID=0426:3011");
+        fatal("Cannot find Scythe pedal with VID:PID=0426:3011.\nCheck that a Scythe device is connected and that you have the correct permissions to access it.");
     }
 }
 
