@@ -106,7 +106,7 @@ void init() {
         }
     }
     if (dev == NULL) {
-        fatal("Cannot find footswitch with one of the supported VID:PID");
+        fatal("Cannot find footswitch with one of the supported VID:PID.\nCheck that the device is connected and that you have the correct permissions to access it.");
     }
 }
 
