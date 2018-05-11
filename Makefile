@@ -19,7 +19,8 @@ all: scythe.c footswitch.c common.h common.c debug.h debug.c
 	$(CC) scythe.c common.c debug.c -o scythe $(CFLAGS) $(LDFLAGS)
 
 install: all
-	$(INSTALL) $(PROGNAME) /usr/local/bin
+	$(INSTALL) footswitch /usr/local/bin
+	$(INSTALL) scythe /usr/local/bin
 ifeq ($(UNAME), Linux)
 	$(INSTALLDATA) 19-footswitch.rules /etc/udev/rules.d
 endif
