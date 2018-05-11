@@ -25,6 +25,14 @@ ifeq ($(UNAME), Linux)
 	$(INSTALLDATA) 19-footswitch.rules /etc/udev/rules.d
 endif
 
+uninstall: all
+	rm /usr/local/bin/footswitch
+	rm /usr/local/bin/scythe
+ifeq ($(UNAME), Linux)
+	rm /etc/udev/rules.d/19-footswitch.rules
+endif
+
+
 clean:
 	rm -f scythe footswitch *.o
 
