@@ -32,7 +32,6 @@ ifeq ($(UNAME), Linux)
 	rm /etc/udev/rules.d/19-footswitch.rules
 endif
 
-
 clean:
 	rm -f scythe footswitch *.o
 
