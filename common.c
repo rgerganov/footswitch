@@ -302,7 +302,7 @@ static const keymap_entry keymap[] =
     {"XF86ScrollDown",       0xf6},
     {"<f7>",                 0xf7},
     {"XF86Sleep",            0xf8},
-    {"XF86ScrrenSaver",      0xf9},
+    {"XF86ScreenSaver",      0xf9},
     {"XF86Reload",           0xfa},
     {"XF86Calculator",       0xfb},
     {"<fc>",                 0xfc},
