@@ -104,6 +104,13 @@ Examples for Scythe
     scythe -1 -m ctrl -a h -a o -2 -m alt -a f4 -3 -b mouse_double
         program the first pedal as Ctrl+h+o, the second pedal as Alt+F4 and the third pedal as double click
 
+Hardware issues
+--------
+Several people have reported misbehaviors with the PCsensor footswitch due to hardware issues.
+If the pedal is continuously sending a keypress without being pressed, then most probably some of
+the elements do not make good contact with the PCB. Follow the [instructions][4] contributed by @krasiyan
+on how to verify and fix this.
+
 Author
 -------
 [Radoslav Gerganov](mailto:rgerganov@gmail.com)
@@ -116,3 +123,4 @@ Contributors
 [1]: http://www.pcsensor.com/index.php?_a=viewCat&catId=2
 [2]: https://github.com/alevchuk/vim-clutch
 [3]: http://www.signal11.us/oss/hidapi/
+[4]: https://github.com/rgerganov/footswitch/issues/26#issuecomment-401429709
