@@ -4,19 +4,19 @@ CFLAGS = -Wall
 UNAME := $(shell uname)
 ifeq ($(UNAME), Darwin)
 	CFLAGS += -DOSX $(shell pkg-config --cflags hidapi)
-	LDFLAGS = $(shell pkg-config --libs hidapi)
+	LDLIBS = $(shell pkg-config --libs hidapi)
 else
 	ifeq ($(UNAME), Linux)
 		CFLAGS += $(shell pkg-config --cflags hidapi-libusb)
-		LDFLAGS = $(shell pkg-config --libs hidapi-libusb)
+		LDLIBS = $(shell pkg-config --libs hidapi-libusb)
 	else
-		LDFLAGS = -lhidapi
+		LDLIBS = -lhidapi
 	endif
 endif
 
 all: scythe.c footswitch.c common.h common.c debug.h debug.c
-	$(CC) footswitch.c common.c debug.c -o footswitch $(CFLAGS) $(LDFLAGS)
-	$(CC) scythe.c common.c debug.c -o scythe $(CFLAGS) $(LDFLAGS)
+	$(CC) footswitch.c common.c debug.c -o footswitch $(CFLAGS) $(LDLIBS)
+	$(CC) scythe.c common.c debug.c -o scythe $(CFLAGS) $(LDLIBS)
 
 install: all
 	$(INSTALL) footswitch /usr/local/bin
