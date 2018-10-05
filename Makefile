@@ -1,3 +1,4 @@
+PREFIX = /usr/local
 INSTALL = /usr/bin/install -c
 INSTALLDATA = /usr/bin/install -c -m 644
 CFLAGS = -Wall
@@ -19,15 +20,15 @@ all: scythe.c footswitch.c common.h common.c debug.h debug.c
 	$(CC) scythe.c common.c debug.c -o scythe $(CFLAGS) $(LDFLAGS)
 
 install: all
-	$(INSTALL) footswitch /usr/local/bin
-	$(INSTALL) scythe /usr/local/bin
+	$(INSTALL) footswitch $(PREFIX)/bin
+	$(INSTALL) scythe $(PREFIX)/bin
 ifeq ($(UNAME), Linux)
 	$(INSTALLDATA) 19-footswitch.rules /etc/udev/rules.d
 endif
 
 uninstall: 
-	rm -f /usr/local/bin/footswitch
-	rm -f /usr/local/bin/scythe
+	rm -f $(PREFIX)/bin/footswitch
+	rm -f $(PREFIX)/bin/scythe
 ifeq ($(UNAME), Linux)
 	rm -f /etc/udev/rules.d/19-footswitch.rules
 endif
