@@ -14,9 +14,10 @@ else
 	endif
 endif
 
-all: scythe.c footswitch.c common.h common.c debug.h debug.c
-	$(CC) footswitch.c common.c debug.c -o footswitch $(CFLAGS) $(LDLIBS)
-	$(CC) scythe.c common.c debug.c -o scythe $(CFLAGS) $(LDLIBS)
+all: footswitch scythe
+
+footswitch: footswitch.c common.c debug.c
+scythe: scythe.c common.c debug.c
 
 install: all
 	$(INSTALL) footswitch /usr/local/bin
