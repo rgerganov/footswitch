@@ -227,8 +227,8 @@ void compile_mouse_button(const char *btn_str)
             pedals[curr_pedal].data[4] = 0x82;
             break;
         case MOUSE_MIDDLE:
-            fprintf(stderr, "Middle click is not supported\n");
-            exit(1);
+            pedals[curr_pedal].data[4] = 0x88;
+            break;
         case MOUSE_DOUBLE:
             pedals[curr_pedal].data[4] = 0x80;
             break;
