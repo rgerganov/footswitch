@@ -227,7 +227,7 @@ void compile_mouse_button(const char *btn_str)
             pedals[curr_pedal].data[4] = 0x82;
             break;
         case MOUSE_MIDDLE:
-            pedals[curr_pedal].data[4] = 0x88;
+            pedals[curr_pedal].data[4] = 0x84;
             break;
         case MOUSE_DOUBLE:
             pedals[curr_pedal].data[4] = 0x80;
