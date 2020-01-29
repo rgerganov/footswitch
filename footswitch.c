@@ -235,7 +235,7 @@ void read_pedals() {
     unsigned char query[8] = {0x01, 0x82, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00};
     unsigned char response[8];
 
-    for (i = 0 ; i < 3 ; i++) {
+    for (i = 0 ; i < 6 ; i++) {
         query[3] = i + 1;
         usb_write(query);
         r = hid_read(dev, response, 8);
