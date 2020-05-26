@@ -63,7 +63,7 @@ void usage() {
         "   -S rstring  - append the specified raw string (hex numbers delimited with spaces)\n"
         "   -a key      - append the specified key\n"
         "   -k key      - write the specified key\n"
-        "   -m modifier - ctrl|shift|alt|win\n"
+        "   -m modifier - (l_,r_)ctrl|shift|alt|win\n"
         "   -b button   - mouse_left|mouse_middle|mouse_right\n"
         "   -x X        - move the mouse cursor horizontally by X pixels\n"
         "   -y Y        - move the mouse cursor vertically by Y pixels\n"
@@ -168,16 +168,28 @@ void print_mouse(unsigned char data[]) {
 void print_key(unsigned char data[]) {
     char combo[128] = {0};
     if ((data[2] & CTRL) != 0) {
-        strcat(combo, "ctrl+");
+        strcat(combo, "l_ctrl+");
     }
     if ((data[2] & SHIFT) != 0) {
-        strcat(combo, "shift+");
+        strcat(combo, "l_shift+");
     }
     if ((data[2] & ALT) != 0) {
-        strcat(combo, "alt+");
+        strcat(combo, "l_alt+");
     }
     if ((data[2] & WIN) != 0) {
-        strcat(combo, "win+");
+        strcat(combo, "l_win+");
+    }
+    if ((data[2] & R_CTRL) != 0) {
+        strcat(combo, "r_ctrl+");
+    }
+    if ((data[2] & R_SHIFT) != 0) {
+        strcat(combo, "r_shift+");
+    }
+    if ((data[2] & R_ALT) != 0) {
+        strcat(combo, "r_alt+");
+    }
+    if ((data[2] & R_WIN) != 0) {
+        strcat(combo, "r_win+");
     }
     if (data[3] != 0) {
         const char *key = decode_byte(data[3]);
