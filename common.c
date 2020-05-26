@@ -184,7 +184,9 @@ static const keymap_entry keymap[] =
     {"XF86AudioRaiseVolume", 0x80},
     {"XF86AudioLowerVolume", 0x81},
     {"<82>",        0x82},
+    {"Hangul",      0x82},
     {"<83>",        0x83},
+    {"Hangul_Hanja",0x83},
     {"A",           0x84},
     {"B",           0x85},
     {"C",           0x86},
@@ -325,6 +327,30 @@ Bool parse_modifier(const char *arg, enum modifier *mod) {
         return 1;
     } else if (strcasecmp("shift", arg) == 0) {
         *mod = SHIFT;
+        return 1;
+    } else if (strcasecmp("l_ctrl", arg) == 0) {
+        *mod = CTRL;
+        return 1;
+    } else if (strcasecmp("l_alt", arg) == 0) {
+        *mod = ALT;
+        return 1;
+    } else if (strcasecmp("l_win", arg) == 0) {
+        *mod = WIN;
+        return 1;
+    } else if (strcasecmp("l_shift", arg) == 0) {
+        *mod = SHIFT;
+        return 1;
+    }  else if (strcasecmp("r_ctrl", arg) == 0) {
+        *mod = R_CTRL;
+        return 1;
+    } else if (strcasecmp("r_alt", arg) == 0) {
+        *mod = R_ALT;
+        return 1;
+    } else if (strcasecmp("r_win", arg) == 0) {
+        *mod = R_WIN;
+        return 1;
+    } else if (strcasecmp("r_shift", arg) == 0) {
+        *mod = R_SHIFT;
         return 1;
     }
     return 0;

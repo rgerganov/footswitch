@@ -27,6 +27,10 @@ enum modifier {
     SHIFT = 2,
     ALT = 4,
     WIN = 8,
+    R_CTRL = 16,
+    R_SHIFT = 32,
+    R_ALT = 64,
+    R_WIN = 128,
 };
 
 enum mouse_button {
