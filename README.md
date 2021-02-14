@@ -26,11 +26,8 @@ The programs are using the [hidapi][3] library and should work on Linux and OSX.
 
 To build on OSX:
 
-    brew install hidapi
-    git clone https://github.com/rgerganov/footswitch.git
-    cd footswitch
-    make
-    sudo make install
+    brew tap rgerganov/footswitch https://github.com/rgerganov/footswitch.git
+    brew install --HEAD footswitch
 
 Usage
 -----
