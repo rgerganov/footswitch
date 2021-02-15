@@ -13,14 +13,12 @@ os:
 compiler:
   - gcc
 
-before_install:
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install hidapi; fi
-
 script:
   - make
 
 addons:
   apt:
-    packages:
-        - libhidapi-dev
+    packages: libhidapi-dev
+  homebrew:
+    packages: hidapi
+    update: true
