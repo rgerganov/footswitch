@@ -8,6 +8,7 @@ Command line utlities for programming [PCsensor][1] and Scythe foot switches. Th
  * `0c45:7403`
  * `0c45:7404`
  * `413d:2107`
+ * `1a86:e026`
 
 Scythe switches with `vendorId:productId`=`0426:3011` can be programmed with the `scythe` binary. You can find the `vendorId` and `productId` of your device using the `lsusb` command on Linux.
 
