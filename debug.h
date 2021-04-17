@@ -22,8 +22,8 @@ THE SOFTWARE.
 #ifndef __DEBUG_H__
 #define __DEBUG_H__
 
-#define fatal(msg...) { \
-    fprintf(stderr, msg); \
+#define fatal(...) { \
+    fprintf(stderr, __VA_ARGS__); \
     fprintf(stderr, " [%s(), %s:%u]\n", __FUNCTION__, __FILE__, __LINE__); \
     exit(1); \
     }
