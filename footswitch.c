@@ -54,7 +54,8 @@ pedal_data *curr_pedal = &pd.pedals[1]; // start at the second pedal
 #define STRING_TYPE    4
 
 void usage() {
-    fprintf(stderr, "Usage: footswitch [-123] [-r] [-s <string>] [-S <raw_string>] [-ak <key>] [-m <modifier>] [-b <button>] [-xyw <XYW>]\n"
+    fprintf(stderr, "Usage: footswitch [ -d <index> ] [-123] [-r] [-s <string>] [-S <raw_string>] [-ak <key>] [-m <modifier>] [-b <button>] [-xyw <XYW>]\n"
+        "   -d index    - select the device (first device is index 0) to operate on\n"
         "   -r          - read all pedals\n"
         "   -1          - program the first pedal\n"
         "   -2          - program the second pedal (default)\n"
@@ -72,7 +73,7 @@ void usage() {
     exit(1);
 }
 
-void init_pid(unsigned short vid, unsigned short pid) {
+void init_pid(unsigned short vid, unsigned short pid, int* pedal_index) {
 #ifdef OSX
     hid_init();
     dev = hid_open(vid, pid, NULL);
@@ -83,8 +84,12 @@ void init_pid(unsigned short vid, unsigned short pid) {
     ptr = info;
     while (ptr != NULL) {
         if (ptr->interface_number == 1) {
-            dev = hid_open_path(ptr->path);
-            break;
+            if(*pedal_index == 0) {
+                dev = hid_open_path(ptr->path);
+                break;
+            } else {
+                *pedal_index = *pedal_index - 1;
+            }
         }
         ptr = ptr->next;
     }
@@ -92,7 +97,7 @@ void init_pid(unsigned short vid, unsigned short pid) {
 #endif
 }
 
-void init() {
+void init(int pedal_index) {
     unsigned short vid_pid[][2] = {
         {0x0c45, 0x7403},
         {0x0c45, 0x7404},
@@ -102,9 +107,15 @@ void init() {
     };
     int i = 0;
     for (i = 0 ; i < sizeof(vid_pid) / sizeof(vid_pid[0]) ; i++) {
-        init_pid(vid_pid[i][0], vid_pid[i][1]);
+        init_pid(vid_pid[i][0], vid_pid[i][1], &pedal_index);
         if (dev != NULL) {
-            break;
+            if(pedal_index == 0) {
+                break;
+            } else {
+                hid_close(dev);
+                dev = NULL;
+                pedal_index = pedal_index - 1;
+            }
         }
     }
     if (dev == NULL) {
@@ -490,12 +501,23 @@ void write_pedals() {
 
 int main(int argc, char *argv[]) {
     int opt;
+    int pedal_index;
 
     if (argc == 1) {
         usage();
     }
+    if (argc > 3 && strcmp(argv[1], "-d") == 0) {
+       pedal_index = atoi(argv[2]);
+       int i;
+       for(i = 3; i < argc; i++) {
+           argv[i-2] = argv[i];
+       }
+       argc = argc - 2;
+    } else {
+       pedal_index = 0;
+    }
     if (argc == 2 && strcmp(argv[1], "-r") == 0) {
-        init();
+        init(pedal_index);
         read_pedals();
         deinit();
         return 0;
@@ -547,7 +569,7 @@ int main(int argc, char *argv[]) {
                 break;
         }
     }
-    init();
+    init(pedal_index);
     write_pedals();
     deinit();
     return 0;
