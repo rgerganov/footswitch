@@ -21,17 +21,17 @@ footswitch: footswitch.c common.c debug.c
 scythe: scythe.c common.c debug.c
 
 install: all
-	$(INSTALL) footswitch $(PREFIX)/bin
-	$(INSTALL) scythe $(PREFIX)/bin
+	$(INSTALL) footswitch $(DESTDIR)$(PREFIX)/bin
+	$(INSTALL) scythe $(DESTDIR)$(PREFIX)/bin
 ifeq ($(UNAME), Linux)
-	$(INSTALLDATA) 19-footswitch.rules /etc/udev/rules.d
+	$(INSTALLDATA) 19-footswitch.rules $(DESTDIR)/etc/udev/rules.d
 endif
 
 uninstall: 
-	rm -f $(PREFIX)/bin/footswitch
-	rm -f $(PREFIX)/bin/scythe
+	rm -f $(DESTDIR)$(PREFIX)/bin/footswitch
+	rm -f $(DESTDIR)$(PREFIX)/bin/scythe
 ifeq ($(UNAME), Linux)
-	rm -f /etc/udev/rules.d/19-footswitch.rules
+	rm -f $(DESTDIR)/etc/udev/rules.d/19-footswitch.rules
 endif
 
 clean:
