@@ -1,4 +1,9 @@
-PREFIX = /usr/local
+# PREFIX = /usr/local
+PREFIX = /usr
+# UDEVPREFIX = /etc/udev
+UDEVPREFIX = /lib/udev
+
+
 INSTALL = /usr/bin/install -c
 INSTALLDATA = /usr/bin/install -c -m 644
 CFLAGS = -Wall
@@ -26,7 +31,7 @@ install: all
 	$(INSTALL) scythe $(DESTDIR)$(PREFIX)/bin
 ifeq ($(UNAME), Linux)
 	$(INSTALL) -d $(DESTDIR)/etc/udev/rules.d
-	$(INSTALLDATA) 19-footswitch.rules $(DESTDIR)/etc/udev/rules.d
+	$(INSTALLDATA) 19-footswitch.rules $(DESTDIR)$(UDEVPREFIX)/rules.d
 endif
 
 uninstall:
