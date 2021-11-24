@@ -1,6 +1,6 @@
 PREFIX = /usr/local
-INSTALL = /usr/bin/install -cd
-INSTALLDATA = /usr/bin/install -cd -m 644
+INSTALL = /usr/bin/install -c
+INSTALLDATA = /usr/bin/install -c -m 644
 CFLAGS = -Wall
 UNAME := $(shell uname)
 ifeq ($(UNAME), Darwin)
@@ -21,13 +21,13 @@ footswitch: footswitch.c common.c debug.c
 scythe: scythe.c common.c debug.c
 
 install: all
-	$(INSTALL) footswitch $(DESTDIR)$(PREFIX)/bin/
-	$(INSTALL) scythe $(DESTDIR)$(PREFIX)/bin/
+	$(INSTALL) footswitch -D $(DESTDIR)$(PREFIX)/bin/
+	$(INSTALL) scythe -D $(DESTDIR)$(PREFIX)/bin/
 ifeq ($(UNAME), Linux)
-	$(INSTALLDATA) 19-footswitch.rules $(DESTDIR)/etc/udev/rules.d
+	$(INSTALLDATA) 19-footswitch.rules -D $(DESTDIR)/etc/udev/rules.d
 endif
 
-uninstall: 
+uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/bin/footswitch
 	rm -f $(DESTDIR)$(PREFIX)/bin/scythe
 ifeq ($(UNAME), Linux)
