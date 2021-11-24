@@ -21,8 +21,8 @@ footswitch: footswitch.c common.c debug.c
 scythe: scythe.c common.c debug.c
 
 install: all
-	$(INSTALL) footswitch $(DESTDIR)$(PREFIX)/bin
-	$(INSTALL) scythe $(DESTDIR)$(PREFIX)/bin
+	$(INSTALL) footswitch $(DESTDIR)$(PREFIX)/bin/
+	$(INSTALL) scythe $(DESTDIR)$(PREFIX)/bin/
 ifeq ($(UNAME), Linux)
 	$(INSTALLDATA) 19-footswitch.rules $(DESTDIR)/etc/udev/rules.d
 endif
