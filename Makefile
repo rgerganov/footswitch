@@ -1,8 +1,5 @@
-# PREFIX = /usr/local
-PREFIX = /usr
-# UDEVPREFIX = /etc/udev
-UDEVPREFIX = /lib/udev
-
+PREFIX = /usr/local
+UDEVPREFIX = /etc/udev
 
 INSTALL = /usr/bin/install -c
 INSTALLDATA = /usr/bin/install -c -m 644
