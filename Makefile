@@ -26,7 +26,7 @@ install: all
 	$(INSTALL) scythe $(DESTDIR)$(PREFIX)/bin
 ifeq ($(UNAME), Linux)
 	$(INSTALL) -d $(DESTDIR)$(PREFIX)/etc/udev/rules.d
-	$(INSTALLDATA) 19-footswitch.rules -D $(DESTDIR)/etc/udev/rules.d
+	$(INSTALLDATA) 19-footswitch.rules $(DESTDIR)/etc/udev/rules.d
 endif
 
 uninstall:
