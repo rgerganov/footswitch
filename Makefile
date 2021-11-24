@@ -30,7 +30,7 @@ install: all
 	$(INSTALL) footswitch $(DESTDIR)$(PREFIX)/bin
 	$(INSTALL) scythe $(DESTDIR)$(PREFIX)/bin
 ifeq ($(UNAME), Linux)
-	$(INSTALL) -d $(DESTDIR)/etc/udev/rules.d
+	$(INSTALL) -d $(DESTDIR)$(UDEVPREFIX)/rules.d
 	$(INSTALLDATA) 19-footswitch.rules $(DESTDIR)$(UDEVPREFIX)/rules.d
 endif
 
