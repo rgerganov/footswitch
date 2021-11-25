@@ -35,7 +35,7 @@ uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/bin/footswitch
 	rm -f $(DESTDIR)$(PREFIX)/bin/scythe
 ifeq ($(UNAME), Linux)
-	rm -f $(DESTDIR)/etc/udev/rules.d/19-footswitch.rules
+	rm -f $(DESTDIR)$(UDEVPREFIX)/rules.d/19-footswitch.rules
 endif
 
 clean:
