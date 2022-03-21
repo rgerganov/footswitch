@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/rgerganov/footswitch.svg?branch=master)](https://travis-ci.org/rgerganov/footswitch)
+[![Build Status](https://github.com/rgerganov/footswitch/workflows/CI/badge.svg)](https://github.com/rgerganov/footswitch/actions)
 
 Footswitch
 ----------
