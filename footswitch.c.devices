@@ -41,7 +41,7 @@ typedef struct pedal_data
 typedef struct pedal_protocol
 {
     unsigned char start[8];
-    pedal_data pedals[6];
+    pedal_data pedals[3];
 } pedal_protocol;
 
 pedal_protocol pd = {{0}};
@@ -54,15 +54,12 @@ pedal_data *curr_pedal = &pd.pedals[1]; // start at the second pedal
 #define STRING_TYPE    4
 
 void usage() {
-    fprintf(stderr, "Usage: footswitch [-d <index>] [-123456] [-r] [-s <string>] [-S <raw_string>] [-ak <key>] [-m <modifier>] [-b <button>] [-xyw <XYW>]\n"
+    fprintf(stderr, "Usage: footswitch [ -d <index> ] [-123] [-r] [-s <string>] [-S <raw_string>] [-ak <key>] [-m <modifier>] [-b <button>] [-xyw <XYW>]\n"
         "   -d index    - select the device (first device is index 0) to operate on\n"
         "   -r          - read all pedals\n"
         "   -1          - program the first pedal\n"
         "   -2          - program the second pedal (default)\n"
         "   -3          - program the third pedal\n"
-        "   -4          - program the fourth pedal\n"
-        "   -5          - program the fifth pedal\n"
-        "   -6          - program the sixth pedal\n"
         "   -s string   - append the specified string\n"
         "   -S rstring  - append the specified raw string (hex numbers delimited with spaces)\n"
         "   -a key      - append the specified key\n"
@@ -106,7 +103,6 @@ void init(int pedal_index) {
         {0x0c45, 0x7404},
         {0x413d, 0x2107},
         {0x1a86, 0xe026},
-        {0x1a86, 0xe02d}
     };
     int i = 0;
     for (i = 0 ; i < sizeof(vid_pid) / sizeof(vid_pid[0]) ; i++) {
@@ -146,9 +142,6 @@ void init_pedals() {
     init_pedal(&pd.pedals[0], 0);
     init_pedal(&pd.pedals[1], 1);
     init_pedal(&pd.pedals[2], 2);
-    init_pedal(&pd.pedals[3], 3);
-    init_pedal(&pd.pedals[4], 4);
-    init_pedal(&pd.pedals[5], 5);
 }
 
 void deinit() {
@@ -253,7 +246,7 @@ void read_pedals() {
     unsigned char query[8] = {0x01, 0x82, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00};
     unsigned char response[8];
 
-    for (i = 0 ; i < 6 ; i++) {
+    for (i = 0 ; i < 3 ; i++) {
         query[3] = i + 1;
         usb_write(query);
         r = hid_read(dev, response, 8);
@@ -296,7 +289,7 @@ void read_pedals() {
  *   KEY_TYPE | MOUSE_TYPE,
  *   STRING_TYPE
  */
-bool set_pedal_type(unsigned char new_type) {
+Bool set_pedal_type(unsigned char new_type) {
     unsigned char *curr_type = &curr_pedal->data[1];
     // check if there is no type set (default)
     if (*curr_type == 0) {
@@ -305,7 +298,7 @@ bool set_pedal_type(unsigned char new_type) {
         if (new_type == STRING_TYPE) {
             curr_pedal->data_len = 2;
         }
-        return true;
+        return 1;
     }
     // type is already set, check if we can add the new type
     switch (new_type) {
@@ -314,12 +307,12 @@ bool set_pedal_type(unsigned char new_type) {
         case KEY_TYPE:
         case MOUSE_TYPE:
             if (*curr_type == STRING_TYPE) {
-                return false;
+                return 0;
             }
             *curr_type |= new_type;
-            return true;
+            return 1;
     }
-    return false;
+    return 0;
 }
 
 void compile_string_data(unsigned char *data, size_t len) {
@@ -411,7 +404,7 @@ void compile_modifier(const char *mod_str) {
     enum modifier mod;
 
     if (!parse_modifier(mod_str, &mod)) {
-        fprintf(stderr, "Invalid modifier '%s'\n", mod_str);
+        fprintf(stderr, "Invlalid modifier '%s'\n", mod_str);
         exit(1);
     }
     if (!set_pedal_type(KEY_TYPE)) {
@@ -503,9 +496,6 @@ void write_pedals() {
     write_pedal(&pd.pedals[0]);
     write_pedal(&pd.pedals[1]);
     write_pedal(&pd.pedals[2]);
-    write_pedal(&pd.pedals[3]);
-    write_pedal(&pd.pedals[4]);
-    write_pedal(&pd.pedals[5]);
 }
 
 int main(int argc, char *argv[]) {
@@ -532,7 +522,7 @@ int main(int argc, char *argv[]) {
         return 0;
     }
     init_pedals();
-    while ((opt = getopt(argc, argv, "123456rs:S:a:k:m:b:x:y:w:")) != -1) {
+    while ((opt = getopt(argc, argv, "123rs:S:a:k:m:b:x:y:w:")) != -1) {
         switch (opt) {
             case '1':
                 curr_pedal = &pd.pedals[0];
@@ -542,15 +532,6 @@ int main(int argc, char *argv[]) {
                 break;
             case '3':
                 curr_pedal = &pd.pedals[2];
-                break;
-            case '4':
-                curr_pedal = &pd.pedals[3];
-                break;
-            case '5':
-                curr_pedal = &pd.pedals[4];
-                break;
-            case '6':
-                curr_pedal = &pd.pedals[5];
                 break;
             case 'r':
                 fprintf(stderr, "Cannot use -r with other options\n");

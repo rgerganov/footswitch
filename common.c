@@ -327,6 +327,7 @@ bool parse_modifier(const char *arg, enum modifier *mod) {
         return true;
     } else if (strcasecmp("shift", arg) == 0) {
         *mod = SHIFT;
+<<<<<<< HEAD
         return true;
     } else if (strcasecmp("l_ctrl", arg) == 0) {
         *mod = CTRL;
@@ -352,6 +353,33 @@ bool parse_modifier(const char *arg, enum modifier *mod) {
     } else if (strcasecmp("r_shift", arg) == 0) {
         *mod = R_SHIFT;
         return true;
+=======
+        return 1;
+    } else if (strcasecmp("l_ctrl", arg) == 0) {
+        *mod = CTRL;
+        return 1;
+    } else if (strcasecmp("l_alt", arg) == 0) {
+        *mod = ALT;
+        return 1;
+    } else if (strcasecmp("l_win", arg) == 0) {
+        *mod = WIN;
+        return 1;
+    } else if (strcasecmp("l_shift", arg) == 0) {
+        *mod = SHIFT;
+        return 1;
+    }  else if (strcasecmp("r_ctrl", arg) == 0) {
+        *mod = R_CTRL;
+        return 1;
+    } else if (strcasecmp("r_alt", arg) == 0) {
+        *mod = R_ALT;
+        return 1;
+    } else if (strcasecmp("r_win", arg) == 0) {
+        *mod = R_WIN;
+        return 1;
+    } else if (strcasecmp("r_shift", arg) == 0) {
+        *mod = R_SHIFT;
+        return 1;
+>>>>>>> 87f1a4f ( Changes to be committed:)
     }
     return false;
 }
