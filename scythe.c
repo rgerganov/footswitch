@@ -53,7 +53,7 @@ void usage()
         "   -3          - program the third pedal\n"
         "   -a key      - append the specified key\n"
         "   -m modifier - ctrl|shift|alt|win\n"
-        "   -b button   - mouse_left|mouse_double|mouse_right\n\n"
+        "   -b button   - mouse_left|mouse_middle|mouse_right|mouse_double\n\n"
         "You cannot mix -a and -m options with -b option for one and the same pedal\n");
     exit(1);
 }
@@ -81,6 +81,9 @@ void print_mouse(unsigned char data[])
             break;
         case 0x82:
             printf("mouse_right");
+            break;
+        case 0x84:
+            printf("mouse_middle");
             break;
         case 0x80:
             printf("mouse_double");
