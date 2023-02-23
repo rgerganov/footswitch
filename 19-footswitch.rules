@@ -1,5 +1,3 @@
-ATTR{product}=="FootSwitch*"\
-MODE:="0666"\
-GROUP="hid"\
-RUN+="keymap $name 0x70066 screenlock"\
-SYMLINK+="footswitch"
+ATTR{product}=="FootSwitch*", MODE:="0666", GROUP="hid", RUN+="keymap $name 0x70066 screenlock", SYMLINK+="footswitch"
+# Scythe2
+SUBSYSTEMS=="usb", ATTRS{idVendor}=="055a", ATTRS{idProduct}=="0998", TAG+="uaccess"

@@ -17,10 +17,11 @@ else
 	endif
 endif
 
-all: footswitch scythe
+all: footswitch scythe scythe2
 
 footswitch: footswitch.c common.c debug.c
 scythe: scythe.c common.c debug.c
+scythe2: scythe2.c common.c debug.c
 
 install: all
 	$(INSTALL) -d $(DESTDIR)$(PREFIX)/bin
@@ -39,5 +40,5 @@ ifeq ($(UNAME), Linux)
 endif
 
 clean:
-	rm -f scythe footswitch *.o
+	rm -f scythe scythe2 footswitch *.o
 
