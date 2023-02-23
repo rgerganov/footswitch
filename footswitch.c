@@ -278,7 +278,7 @@ void read_pedals() {
  *   KEY_TYPE | MOUSE_TYPE,
  *   STRING_TYPE
  */
-Bool set_pedal_type(unsigned char new_type) {
+bool set_pedal_type(unsigned char new_type) {
     unsigned char *curr_type = &curr_pedal->data[1];
     // check if there is no type set (default)
     if (*curr_type == 0) {
@@ -287,7 +287,7 @@ Bool set_pedal_type(unsigned char new_type) {
         if (new_type == STRING_TYPE) {
             curr_pedal->data_len = 2;
         }
-        return 1;
+        return true;
     }
     // type is already set, check if we can add the new type
     switch (new_type) {
@@ -296,12 +296,12 @@ Bool set_pedal_type(unsigned char new_type) {
         case KEY_TYPE:
         case MOUSE_TYPE:
             if (*curr_type == STRING_TYPE) {
-                return 0;
+                return false;
             }
             *curr_type |= new_type;
-            return 1;
+            return true;
     }
-    return 0;
+    return false;
 }
 
 void compile_string_data(unsigned char *data, size_t len) {
@@ -393,7 +393,7 @@ void compile_modifier(const char *mod_str) {
     enum modifier mod;
 
     if (!parse_modifier(mod_str, &mod)) {
-        fprintf(stderr, "Invlalid modifier '%s'\n", mod_str);
+        fprintf(stderr, "Invalid modifier '%s'\n", mod_str);
         exit(1);
     }
     if (!set_pedal_type(KEY_TYPE)) {
