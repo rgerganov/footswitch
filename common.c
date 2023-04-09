@@ -373,7 +373,7 @@ Bool parse_mouse_button(const char *arg, enum mouse_button *btn) {
     return 0;
 }
 
-static Bool encode_char(const char ch, unsigned char *b) {
+Bool encode_char(const char ch, unsigned char *b) {
     int i;
     for (i = 0 ; i < KEYMAP_SIZE ; i++) {
         if (strlen(keymap[i].name) == 1 && keymap[i].name[0] == ch) {

@@ -46,7 +46,7 @@ Bool parse_modifier(const char *arg, enum modifier *mod);
 Bool parse_mouse_button(const char *arg, enum mouse_button *btn);
 
 Bool encode_string(const char *str, unsigned char *arr);
-
+Bool encode_char(const char ch, unsigned char *b);
 Bool encode_key(const char *key, unsigned char *b);
 
 const char* decode_byte(unsigned char b);

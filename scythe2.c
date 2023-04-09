@@ -5,29 +5,51 @@
 #include <unistd.h>
 #include <hidapi.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include "common.h"
 #include "debug.h"
 
+#define MAX_KEYS 255
+
 hid_device *dev = NULL;
 
-static const int template_len = 0x1a;
-static uint8_t template[0x1a] = {
-    0x1a, 0x00, 0x01, 0x10, 0xf0, 0x05, 0x01, 0x10,
-    0xf0, 0x1f, 0x01, 0x10, 0xf0, 0x20, 0x01, 0x10,
-    0xf0, 0x21, 0x01, 0x10, 0xf0, 0x22, 0x01, 0x10,
-    0xf0, 0x23};
+enum event_type {
+    NONE = 0,
+    SINGLE_KEY_REPEAT = 0x10,
+    SINGLE_KEY_NOREPEAT = 0x20,
+    MULTIPLE_KEYS = 0x30,
+} event_type;
+
+typedef struct key_data {
+    uint8_t mod;
+    uint8_t code;
+} key_data;
+
+typedef struct pedal_data
+{
+    enum event_type type;
+    int count;
+    key_data keys[MAX_KEYS];
+} pedal_data;
+
+pedal_data pedals[6];
+int curr_pedal = 0;
 
 void usage()
 {
-    fprintf(stderr, "Usage: scythe [-123] [-r] [-a <key>] [-m <modifier>] [-b <button>]\n"
+    fprintf(stderr, "Usage: scythe2 [-123456] [-r] [-k <key>] [-a <key>] [-m <modifier>] [-b <button>]\n"
         "   -r          - read all pedals\n"
         "   -1          - program the first pedal\n"
         "   -2          - program the second pedal (default)\n"
         "   -3          - program the third pedal\n"
-        "   -a key      - append the specified key\n"
+        "   -4          - program the fourth pedal\n"
+        "   -5          - program the fifth pedal\n"
+        "   -6          - program the sixth pedal\n"
+        "   -s string   - append the specified string\n"
+        "   -a key      - write the specified key (no repeat)\n"
+        "   -k key      - write the specified key (repeat)\n"
         "   -m modifier - ctrl|shift|alt|win\n"
-        "   -b button   - mouse_left|mouse_middle|mouse_right|mouse_double\n\n"
-        "You cannot mix -a and -m options with -b option for one and the same pedal\n");
+        "   -b button   - mouse_left|mouse_middle|mouse_right|mouse_double\n");
     exit(1);
 }
 
@@ -85,21 +107,21 @@ void UpdateSetting(uint8_t *data, int len)
     buff[3] = 0x2c;         // local_45
     buff[6] = 0x02;         // local_42
     SetUpdateEx(buff, 0x48);
-    int offset = 0;         // iVar5
-    int count = 0x20;       // uVar4
-    if (len < 0x20) {
-        count = len;
+    for (int offset = 0; offset < len; offset += 0x20) {
+        int count = len - offset;
+        if (count > 0x20) {
+            count = 0x20;
+        }
+        buff[3] = 0x26;             // local_45
+        buff[4] = offset >> 8;       // local_44
+        buff[5] = offset;            // local_43
+        buff[6] = count;            // local_42
+        for (int i = 0; i < count; i++) {
+            buff[8+i] = data[offset+i];
+        }
+        SetUpdateEx(buff, 0x48);
+        SetUpdateEx(buff, 0x48);
     }
-    len = len - count;
-    buff[3] = 0x26;             // local_45
-    buff[4] = offset >> 8;       // local_44
-    buff[5] = offset;            // local_43
-    buff[6] = count;            // local_42
-    for (int i = 0; i < count; i++) {
-        buff[8+i] = data[offset+i];
-    }
-    SetUpdateEx(buff, 0x48);
-    SetUpdateEx(buff, 0x48);
     buff[3] = 0x2b;             // local_45
     buff[4] = 0x14;             // local_44
     buff[5] = 0x23;             // local_43
@@ -107,21 +129,217 @@ void UpdateSetting(uint8_t *data, int len)
     SetUpdateEx(buff, 0x48);
 }
 
-void compile_key(const char *key)
+static bool set_pedal_type(enum event_type new_type)
 {
-    uint8_t b = 0;
-    if (!encode_key(key, &b)) {
+    if (pedals[curr_pedal].type == NONE) {
+        pedals[curr_pedal].type = new_type;
+        return true;
+    }
+    return false;
+}
+
+void compile_string(const char *str)
+{
+    if (!set_pedal_type(MULTIPLE_KEYS)) {
+        fprintf(stderr, "Invalid combination of options\n");
+        usage();
+    }
+    int len = strlen(str);
+    if (len > MAX_KEYS) {
+        fprintf(stderr, "The string length exceeds %d\n", MAX_KEYS);
+        exit(1);
+    }
+    pedals[curr_pedal].count = len;
+    for (int i = 0; i < strlen(str); i++) {
+        pedals[curr_pedal].keys[i].mod = 0xf0;
+        uint8_t code = 0;
+        encode_char(str[i], &code);
+        pedals[curr_pedal].keys[i].code = code;
+    }
+}
+
+void compile_key_norepeat(const char *key)
+{
+    if (!set_pedal_type(SINGLE_KEY_NOREPEAT)) {
+        fprintf(stderr, "Invalid combination of options\n");
+        usage();
+    }
+    uint8_t code = 0;
+    if (!encode_key(key, &code)) {
         fprintf(stderr, "Cannot encode key '%s'\n", key);
         exit(1);
     }
-    template[5] = b;
+    pedals[curr_pedal].count = 1;
+    pedals[curr_pedal].keys[0].mod |= 0xf0;
+    pedals[curr_pedal].keys[0].code = code;
 }
 
-void write_pedals() {
+void compile_key_repeat(const char *key)
+{
+    if (!set_pedal_type(SINGLE_KEY_REPEAT)) {
+        fprintf(stderr, "Invalid combination of options\n");
+        usage();
+    }
+    uint8_t code = 0;
+    if (!encode_key(key, &code)) {
+        fprintf(stderr, "Cannot encode key '%s'\n", key);
+        exit(1);
+    }
+    pedals[curr_pedal].count = 1;
+    pedals[curr_pedal].keys[0].mod |= 0xf0;
+    pedals[curr_pedal].keys[0].code = code;
+}
+
+void compile_modifier(const char *mod_str)
+{
+    enum modifier mod;
+
+    if (!parse_modifier(mod_str, &mod)) {
+        fprintf(stderr, "Invalid modifier '%s'\n", mod_str);
+        exit(1);
+    }
+    pedals[curr_pedal].keys[0].mod |= mod;
+}
+
+void compile_mouse_button(const char *btn_str)
+{
+    enum mouse_button btn;
+    if (!set_pedal_type(SINGLE_KEY_REPEAT)) {
+        fprintf(stderr, "Invalid combination of options\n");
+        usage();
+    }
+    if (!parse_mouse_button(btn_str, &btn)) {
+        fprintf(stderr, "Invalid mouse button '%s'\n", btn_str);
+        exit(1);
+    }
+    pedals[curr_pedal].count = 1;
+    pedals[curr_pedal].keys[0].mod = 0xc0;
+    pedals[curr_pedal].keys[0].code = btn;
+}
+
+void write_pedals()
+{
+    int data_length = 2;
+    for (int i = 0; i < 6; i++) {
+        // if the user hasn't specified anything, program the pedal with key 'a'
+        if (pedals[i].type == NONE) {
+            pedals[i].type = SINGLE_KEY_REPEAT;
+            pedals[i].count = 1;
+            pedals[i].keys[0].mod = 0xf0;
+            pedals[i].keys[0].code = 4;
+        }
+        data_length += pedals[i].count*2 + 2;
+    }
+    uint8_t *data = malloc(data_length);
+    if (!data) {
+        fprintf(stderr, "Not enough memory\n");
+        exit(1);
+    }
+
+    // <len % 256> <len / 256>
+    // <count> <type> <mod> <code> [<mod> <code>]
+    // <count> <type> <mod> <code> [<mod> <code>]
+    // <count> <type> <mod> <code> [<mod> <code>]
+    // <count> <type> <mod> <code> [<mod> <code>]
+    // <count> <type> <mod> <code> [<mod> <code>]
+    // <count> <type> <mod> <code> [<mod> <code>]
+    //
+    // Note: count>1 only if type==0x30
+    // Note: mod==0xc0 for mouse buttons
+    int ind = 0;
+    data[ind++] = data_length % 256;
+    data[ind++] = data_length / 256;
+    for (int i = 0; i < 6; i++) {
+        data[ind++] = pedals[i].count;
+        data[ind++] = pedals[i].type;
+        for (int j = 0; j < pedals[i].count; j++) {
+            data[ind++] = pedals[i].keys[j].mod;
+            data[ind++] = pedals[i].keys[j].code;
+        }
+    }
+
+    // printf("data_length = %d\n", data_length);
+    // for (int i = 0; i < data_length; i++) {
+    //     printf("%02X ", data[i]);
+    // }
+    // printf("\n");
+
     uint8_t buff[0x48] = {0};
     SetUpdateEx(buff, 0x48);
-    UpdateSetting(template, template_len);
+    UpdateSetting(data, data_length);
     printf("Done. Unplug the footswitch and then plug it back again.\n");
+    free(data);
+}
+
+static void print_key(int mod, uint8_t code)
+{
+    if (mod == 0xc0) {
+        if (code & MOUSE_LEFT) {
+            printf("mouse left\n");
+        }
+        if (code & MOUSE_RIGHT) {
+            printf("mouse right\n");
+        }
+    } else {
+        if (mod & CTRL) {
+            printf("ctrl+");
+        }
+        if (mod & SHIFT) {
+            printf("shift+");
+        }
+        if (mod & ALT) {
+            printf("alt+");
+        }
+        if (mod & WIN) {
+            printf("win+");
+        }
+        printf("%s\n", decode_byte(code));
+    }
+}
+
+static void print_pedal(int num, const uint8_t *data)
+{
+    int count = data[0];
+    int type = data[1];
+    switch (type) {
+    case SINGLE_KEY_REPEAT:
+        printf("Pedal %d (single key repeat): ", num);
+        print_key(data[2], data[3]);
+        break;
+    case SINGLE_KEY_NOREPEAT:
+        printf("Pedal %d (single key no repeat): ", num);
+        print_key(data[2], data[3]);
+        break;
+    case MULTIPLE_KEYS:
+        printf("Pedal %d (multiple keys): ", num);
+        for (int i = 0; i < count; i++) {
+            printf("%s", decode_byte(data[3+i*2]));
+        }
+        printf("\n");
+        break;
+    }
+}
+
+static void read_pedals()
+{
+    uint8_t buff[0x48] = {0};
+    buff[3] = 0x5a;
+    SetUpdateEx(buff, 0x48);
+    int r = hid_get_feature_report(dev, buff, 0x48);
+    if (r < 0) {
+        fatal("error getting feature report (%ls)", hid_error(dev));
+    }
+    int ind = 2;
+    for (int i = 0; i < 6; i++) {
+        int count = buff[ind];
+        int length = count*2 + 2;
+        if (ind + length > 0x48) {
+            // TODO: find how to get the data after 0x48
+            break;
+        }
+        print_pedal(i+1, buff+ind);
+        ind += length;
+    }
 }
 
 int main(int argc, char *argv[]) {
@@ -132,35 +350,47 @@ int main(int argc, char *argv[]) {
     }
     if (argc == 2 && strcmp(argv[1], "-r") == 0) {
         init();
-        // TODO: implement
-        // read_pedals();
+        read_pedals();
         deinit();
         return 0;
     }
-    while ((opt = getopt(argc, argv, "123ra:m:b:")) != -1) {
+    while ((opt = getopt(argc, argv, "123456rs:a:k:m:b:")) != -1) {
         switch (opt) {
             case '1':
-                // TODO: implement
+                curr_pedal = 0;
                 break;
             case '2':
-                // TODO: implement
+                curr_pedal = 1;
                 break;
             case '3':
-                // TODO: implement
+                curr_pedal = 2;
+                break;
+            case '4':
+                curr_pedal = 3;
+                break;
+            case '5':
+                curr_pedal = 4;
+                break;
+            case '6':
+                curr_pedal = 5;
                 break;
             case 'r':
                 fprintf(stderr, "Cannot use -r with other options\n");
                 return 1;
+            case 's':
+                compile_string(optarg);
+                break;
             case 'a':
-                compile_key(optarg);
+                compile_key_norepeat(optarg);
+                break;
+            case 'k':
+                compile_key_repeat(optarg);
                 break;
             case 'm':
-                // TODO: implement
-                //compile_modifier(optarg);
+                compile_modifier(optarg);
                 break;
             case 'b':
-                // TODO: implement
-                //compile_mouse_button(optarg);
+                compile_mouse_button(optarg);
                 break;
             default:
                 usage();

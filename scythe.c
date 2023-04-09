@@ -152,7 +152,7 @@ void read_pedals()
     }
 }
 
-void compile_key(const char *key)
+void compile_key_repeat(const char *key)
 {
     unsigned char b = 0;
     int i;
@@ -300,7 +300,7 @@ int main(int argc, char *argv[]) {
                 fprintf(stderr, "Cannot use -r with other options\n");
                 return 1;
             case 'a':
-                compile_key(optarg);
+                compile_key_repeat(optarg);
                 break;
             case 'm':
                 compile_modifier(optarg);

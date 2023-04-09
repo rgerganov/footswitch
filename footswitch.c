@@ -393,7 +393,7 @@ void compile_modifier(const char *mod_str) {
     enum modifier mod;
 
     if (!parse_modifier(mod_str, &mod)) {
-        fprintf(stderr, "Invlalid modifier '%s'\n", mod_str);
+        fprintf(stderr, "Invalid modifier '%s'\n", mod_str);
         exit(1);
     }
     if (!set_pedal_type(KEY_TYPE)) {
