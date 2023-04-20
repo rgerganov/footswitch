@@ -80,7 +80,7 @@ void send_report(unsigned char *ptr, int len)
 }
 
 // BXKBSettingLib.dll + 0x10B0
-void prepare(uint8_t *data, int len)
+void checksum(uint8_t *data, int len)
 {
     uint8_t sum = 0;
     data[7] = 0;
@@ -96,7 +96,7 @@ void SetUpdateEx(uint8_t *data, int len)
     data[0] = 0x05;
     data[1] = 0x96;
     data[2] = 0xa5;
-    prepare(data, len);
+    checksum(data, len);
     send_report(data, len);
 }
 
