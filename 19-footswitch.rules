@@ -1,3 +1,9 @@
-ATTR{product}=="FootSwitch*", MODE:="0666", GROUP="hid", RUN+="keymap $name 0x70066 screenlock", SYMLINK+="footswitch"
+# PCsensor
+SUBSYSTEMS=="usb", ATTRS{idVendor}=="0c45", ATTRS{idProduct}=="7403", TAG+="uaccess"
+SUBSYSTEMS=="usb", ATTRS{idVendor}=="0c45", ATTRS{idProduct}=="7404", TAG+="uaccess"
+SUBSYSTEMS=="usb", ATTRS{idVendor}=="413d", ATTRS{idProduct}=="2107", TAG+="uaccess"
+SUBSYSTEMS=="usb", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="e026", TAG+="uaccess"
+# Scythe
+SUBSYSTEMS=="usb", ATTRS{idVendor}=="0426", ATTRS{idProduct}=="3011", TAG+="uaccess"
 # Scythe2
 SUBSYSTEMS=="usb", ATTRS{idVendor}=="055a", ATTRS{idProduct}=="0998", TAG+="uaccess"
