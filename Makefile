@@ -1,6 +1,4 @@
 PREFIX = /usr/local
-UDEVPREFIX = /etc/udev
-
 INSTALL = /usr/bin/install -c
 INSTALLDATA = /usr/bin/install -c -m 644
 CFLAGS = -Wall
@@ -32,11 +30,8 @@ ifeq ($(UNAME), Linux)
 	$(INSTALLDATA) 19-footswitch.rules $(DESTDIR)$(UDEVPREFIX)/rules.d
 endif
 
-<<<<<<< HEAD
-uninstall:
-=======
 uninstall: 
->>>>>>> 87f1a4f ( Changes to be committed:)
+
 	rm -f $(DESTDIR)$(PREFIX)/bin/footswitch
 	rm -f $(DESTDIR)$(PREFIX)/bin/scythe
 ifeq ($(UNAME), Linux)
@@ -45,9 +40,5 @@ endif
 
 
 clean:
-<<<<<<< HEAD
-	rm -f scythe scythe2 footswitch *.o
-
-=======
-	rm -f scythe footswitch *.o
->>>>>>> 87f1a4f ( Changes to be committed:)
+  rm -f scythe scythe2 footswitch *.o
+  rm -f scythe footswitch *.o

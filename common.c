@@ -315,124 +315,76 @@ static const keymap_entry keymap[] =
 
 #define KEYMAP_SIZE (sizeof(keymap)/sizeof(keymap_entry))
 
-bool parse_modifier(const char *arg, enum modifier *mod) {
+Bool parse_modifier(const char *arg, enum modifier *mod) {
     if (strcasecmp("ctrl", arg) == 0) {
         *mod = CTRL;
-        return true;
+        return 1;
     } else if (strcasecmp("alt", arg) == 0) {
         *mod = ALT;
-        return true;
+        return 1;
     } else if (strcasecmp("win", arg) == 0) {
         *mod = WIN;
-        return true;
+        return 1;
     } else if (strcasecmp("shift", arg) == 0) {
         *mod = SHIFT;
-<<<<<<< HEAD
-        return true;
-    } else if (strcasecmp("l_ctrl", arg) == 0) {
-        *mod = CTRL;
-        return true;
-    } else if (strcasecmp("l_alt", arg) == 0) {
-        *mod = ALT;
-        return true;
-    } else if (strcasecmp("l_win", arg) == 0) {
-        *mod = WIN;
-        return true;
-    } else if (strcasecmp("l_shift", arg) == 0) {
-        *mod = SHIFT;
-        return true;
-    }  else if (strcasecmp("r_ctrl", arg) == 0) {
-        *mod = R_CTRL;
-        return true;
-    } else if (strcasecmp("r_alt", arg) == 0) {
-        *mod = R_ALT;
-        return true;
-    } else if (strcasecmp("r_win", arg) == 0) {
-        *mod = R_WIN;
-        return true;
-    } else if (strcasecmp("r_shift", arg) == 0) {
-        *mod = R_SHIFT;
-        return true;
-=======
         return 1;
-    } else if (strcasecmp("l_ctrl", arg) == 0) {
-        *mod = CTRL;
-        return 1;
-    } else if (strcasecmp("l_alt", arg) == 0) {
-        *mod = ALT;
-        return 1;
-    } else if (strcasecmp("l_win", arg) == 0) {
-        *mod = WIN;
-        return 1;
-    } else if (strcasecmp("l_shift", arg) == 0) {
-        *mod = SHIFT;
-        return 1;
-    }  else if (strcasecmp("r_ctrl", arg) == 0) {
-        *mod = R_CTRL;
-        return 1;
-    } else if (strcasecmp("r_alt", arg) == 0) {
-        *mod = R_ALT;
-        return 1;
-    } else if (strcasecmp("r_win", arg) == 0) {
-        *mod = R_WIN;
-        return 1;
-    } else if (strcasecmp("r_shift", arg) == 0) {
-        *mod = R_SHIFT;
-        return 1;
->>>>>>> 87f1a4f ( Changes to be committed:)
     }
-    return false;
+    return 0;
 }
 
-bool parse_mouse_button(const char *arg, enum mouse_button *btn) {
+Bool parse_mouse_button(const char *arg, enum mouse_button *btn) {
     if (strcasecmp("mouse_left", arg) == 0) {
         *btn = MOUSE_LEFT;
-        return true;
+        return 1;
     } else if (strcasecmp("mouse_middle", arg) == 0) {
         *btn = MOUSE_MIDDLE;
-        return true;
+        return 1;
     } else if (strcasecmp("mouse_right", arg) == 0) {
         *btn = MOUSE_RIGHT;
-        return true;
+        return 1;
     } else if (strcasecmp("mouse_double", arg) == 0) {
         *btn = MOUSE_DOUBLE;
-        return true;
+        return 1;
     }
-    return false;
+    return 0;
 }
 
-bool encode_char(const char ch, unsigned char *b) {
-    for (int i = 0 ; i < KEYMAP_SIZE ; i++) {
+static Bool encode_char(const char ch, unsigned char *b) {
+    int i;
+    for (i = 0 ; i < KEYMAP_SIZE ; i++) {
         if (strlen(keymap[i].name) == 1 && keymap[i].name[0] == ch) {
             *b = keymap[i].value;
-            return true;
+            return 1;
         }
     }
-    return false;
+    return 0;
 }
 
-bool encode_string(const char *str, unsigned char *arr) {
-    for (int i = 0 ; i < strlen(str) ; i++) {
+Bool encode_string(const char *str, unsigned char *arr) {
+    int i;
+    for (i = 0 ; i < strlen(str) ; i++) {
         if (!encode_char(str[i], &arr[i])) {
-            return false;
+            return 0;
         }
     }
-    return true;
+    return 1;
 }
 
-bool encode_key(const char *key, unsigned char *b) {
-    for (int i = 0 ; i < KEYMAP_SIZE ; i++) {
+Bool encode_key(const char *key, unsigned char *b) {
+    int i;
+    for (i = 0 ; i < KEYMAP_SIZE ; i++) {
         if (strcasecmp(keymap[i].name, key) != 0) {
             continue;
         }
         *b = keymap[i].value;
-        return true;
+        return 1;
     }
-    return false;
+    return 0;
 }
 
 const char* decode_byte(unsigned char b) {
-    for (int i = 0 ; i < KEYMAP_SIZE ; i++) {
+    int i;
+    for (i = 0 ; i < KEYMAP_SIZE ; i++) {
         if (keymap[i].value == b) {
             return keymap[i].name;
         }
