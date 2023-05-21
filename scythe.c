@@ -53,7 +53,7 @@ void usage()
         "   -3          - program the third pedal\n"
         "   -a key      - append the specified key\n"
         "   -m modifier - ctrl|shift|alt|win\n"
-        "   -b button   - mouse_left|mouse_double|mouse_right\n\n"
+        "   -b button   - mouse_left|mouse_middle|mouse_right|mouse_double\n\n"
         "You cannot mix -a and -m options with -b option for one and the same pedal\n");
     exit(1);
 }
@@ -81,6 +81,9 @@ void print_mouse(unsigned char data[])
             break;
         case 0x82:
             printf("mouse_right");
+            break;
+        case 0x84:
+            printf("mouse_middle");
             break;
         case 0x80:
             printf("mouse_double");
@@ -138,7 +141,7 @@ void read_pedals()
         //debug_arr(response, 8);
 
         printf("[switch %d]: ", i + 1);
-        if (response[1] >= 0x80 && response[1] <= 0x82) {
+        if (response[1] >= 0x80 && response[1] <= 0x82 || response[1] == 0x84) {
             print_mouse(response);
         } else if (response[1] == 0xff) {
             printf("undefined");
@@ -149,7 +152,7 @@ void read_pedals()
     }
 }
 
-void compile_key(const char *key)
+void compile_key_repeat(const char *key)
 {
     unsigned char b = 0;
     int i;
@@ -297,7 +300,7 @@ int main(int argc, char *argv[]) {
                 fprintf(stderr, "Cannot use -r with other options\n");
                 return 1;
             case 'a':
-                compile_key(optarg);
+                compile_key_repeat(optarg);
                 break;
             case 'm':
                 compile_modifier(optarg);

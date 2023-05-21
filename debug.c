@@ -23,8 +23,10 @@ THE SOFTWARE.
 #include "debug.h"
 
 void debug_arr(unsigned char data[], int length) {
-    int i;
-    for (i = 0 ; i < length ; i++) {
+    for (int i = 0 ; i < length ; i++) {
+        if (i > 0 && i % 16 == 0) {
+            printf("\n");
+        }
         printf("%02x ", data[i]);
     }
     printf("\n");

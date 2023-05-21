@@ -1,15 +1,23 @@
-[![Build Status](https://travis-ci.org/rgerganov/footswitch.svg?branch=master)](https://travis-ci.org/rgerganov/footswitch)
+[![Build Status](https://github.com/rgerganov/footswitch/workflows/CI/badge.svg)](https://github.com/rgerganov/footswitch/actions)
 
 Footswitch
 ----------
 
-Command line utlities for programming [PCsensor][1] and Scythe foot switches. There is support for both single pedal devices and three pedal devices. Use the `footswitch` binary for the following combinations of `vendorId:productId`:
+Command line utlities for programming [PCsensor][1] and [Scythe](https://www.scythe-eu.com/en/products/pc-accessory/usb-foot-switch-ii.html) foot switches.
 
- * `0c45:7403`
- * `0c45:7404`
- * `413d:2107`
+The following list of devices are supported:
 
-Scythe switches with `vendorId:productId`=`0426:3011` can be programmed with the `scythe` binary. You can find the `vendorId` and `productId` of your device using the `lsusb` command on Linux.
+| vendorId | productId | Program      |
+| ---------|----------| ------------ |
+| 0c45      | 7403      | `footswitch`  |
+| 0c45      | 7404      | `footswitch`  |
+| 413d      | 2107      | `footswitch`  |
+| 1a86      | e026      | `footswitch`  |
+| 1a86      | e02d      | `footswitch`  |
+| 0426      | 3011      | `scythe`       |
+| 055a      | 0998      | `scythe2`      |
+
+You can find the `vendorId` and `productId` of your device using the `lsusb` command on Linux.
 
 The same kind of foot switches are used for building the popular [VIM Clutch][2].
 
@@ -24,13 +32,13 @@ The programs are using the [hidapi][3] library and should work on Linux and OSX.
     make
     sudo make install
 
+The `install` target installs udev rules on Linux which allow running the programs without root.
+You may need to use `sudo` otherwise.
+
 To build on OSX:
 
-    brew install hidapi
-    git clone https://github.com/rgerganov/footswitch.git
-    cd footswitch
-    make
-    sudo make install
+    brew tap rgerganov/footswitch https://github.com/rgerganov/footswitch.git
+    brew install --HEAD footswitch
 
 Usage
 -----
