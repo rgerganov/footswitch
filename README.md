@@ -7,14 +7,15 @@ Command line utlities for programming [PCsensor][1] and [Scythe](https://www.scy
 
 The following list of devices are supported:
 
-| vendorId | productId | Program       |
-| ---------|---------- | ------------- |
-| 0c45     | 7403      | `footswitch`  |
-| 0c45     | 7404      | `footswitch`  |
-| 413d     | 2107      | `footswitch`  |
-| 1a86     | e026      | `footswitch`  |
-| 0426     | 3011      | `scythe`      |
-| 055a     | 0998      | `scythe2`     |
+| vendorId | productId | Program      |
+| ---------|----------| ------------ |
+| 0c45      | 7403      | `footswitch`  |
+| 0c45      | 7404      | `footswitch`  |
+| 413d      | 2107      | `footswitch`  |
+| 1a86      | e026      | `footswitch`  |
+| 1a86      | e02d      | `footswitch`  |
+| 0426      | 3011      | `scythe`       |
+| 055a      | 0998      | `scythe2`      |
 
 You can find the `vendorId` and `productId` of your device using the `lsusb` command on Linux.
 
