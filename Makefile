@@ -27,6 +27,7 @@ install: all
 	$(INSTALL) -d $(DESTDIR)$(PREFIX)/bin
 	$(INSTALL) footswitch $(DESTDIR)$(PREFIX)/bin
 	$(INSTALL) scythe $(DESTDIR)$(PREFIX)/bin
+	$(INSTALL) scythe2 $(DESTDIR)$(PREFIX)/bin
 ifeq ($(UNAME), Linux)
 	$(INSTALL) -d $(DESTDIR)$(UDEVPREFIX)/rules.d
 	$(INSTALLDATA) 19-footswitch.rules $(DESTDIR)$(UDEVPREFIX)/rules.d
@@ -35,6 +36,7 @@ endif
 uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/bin/footswitch
 	rm -f $(DESTDIR)$(PREFIX)/bin/scythe
+	rm -f $(DESTDIR)$(PREFIX)/bin/scythe2
 ifeq ($(UNAME), Linux)
 	rm -f $(DESTDIR)$(UDEVPREFIX)/rules.d/19-footswitch.rules
 endif
