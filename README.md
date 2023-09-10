@@ -13,6 +13,7 @@ The following list of devices are supported:
 | 0c45     | 7404      | `footswitch`  |
 | 413d     | 2107      | `footswitch`  |
 | 1a86     | e026      | `footswitch`  |
+| 3553     | b001      | `footswitch`  |
 | 0426     | 3011      | `scythe`      |
 | 055a     | 0998      | `scythe2`     |
 

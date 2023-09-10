@@ -98,6 +98,7 @@ void init() {
         {0x0c45, 0x7404},
         {0x413d, 0x2107},
         {0x1a86, 0xe026},
+        {0x3553, 0xb001},
     };
     int i = 0;
     for (i = 0 ; i < sizeof(vid_pid) / sizeof(vid_pid[0]) ; i++) {
