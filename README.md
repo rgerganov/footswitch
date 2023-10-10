@@ -84,6 +84,8 @@ Examples for PCsensor
         program the first pedal as Escape key and the second pedal as Enter key
     footswitch -1 -m ctrl -k a -3 -m alt -k f4
         program the first pedal as Ctrl+a and the third pedal as Alt+F4
+    footswitch -1 -m ctrl -k a -3 -m shift -m alt -k s
+        program the first pedal as Ctrl+a and the third pedal as Shift+Alt+s (Wikipedia "save")
     footswitch -m ctrl -b mouse_middle
         program the second pedal as Ctrl+<middle_mouse_click>
     footswitch -s 'hello world'
