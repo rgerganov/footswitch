@@ -21,13 +21,20 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 #include <errno.h>
-#include <unistd.h>
-#include <hidapi.h>
 #include "common.h"
 #include "debug.h"
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+#include <Windows.h>
+#include "getopt.h"
+#include "hidapi.h"
+#else
+#include <hidapi.h>
+#include <string.h>
+#include <unistd.h>
+#endif
 
 hid_device *dev = NULL;
 
@@ -73,7 +80,7 @@ void usage() {
 }
 
 void init_pid(unsigned short vid, unsigned short pid) {
-#ifdef OSX
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
     hid_init();
     dev = hid_open(vid, pid, NULL);
 #else
@@ -140,11 +147,22 @@ void deinit() {
 }
 
 void usb_write(unsigned char data[8]) {
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+    unsigned char win_data[9];
+    win_data[0] = 0;
+    for (int i = 0; i < 8; i++) win_data[i + 1] = data[i];
+    int r = hid_write(dev, win_data, 9);
+#else 
     int r = hid_write(dev, data, 8);
+#endif
     if (r < 0) {
         fatal("error writing data (%ls)", hid_error(dev));
     }
-    usleep(30 * 1000);
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+    Sleep(30 * 1000);
+#else
+    usleep(30 * 1000)
+#endif
 }
 
 void print_mouse(unsigned char data[]) {
@@ -239,6 +257,24 @@ void read_pedals() {
     for (i = 0 ; i < 3 ; i++) {
         query[3] = i + 1;
         usb_write(query);
+        // Read the Manufacturer String
+        #define MAX_STR 255
+        int res;
+        wchar_t wstr[MAX_STR];
+        res = hid_get_manufacturer_string(dev, wstr, MAX_STR);
+        wprintf(L"Manufacturer String: %s\n", wstr);
+        // Read the Product String
+        res = hid_get_product_string(dev, wstr, MAX_STR);
+        wprintf(L"Product String: %s\n", wstr);
+
+        // Read the Serial Number String
+        res = hid_get_serial_number_string(dev, wstr, MAX_STR);
+        wprintf(L"Serial Number String: (%d) %s\n", wstr[0], wstr);
+
+        // Read Indexed String 1
+        res = hid_get_indexed_string(dev, 2, wstr, MAX_STR);
+        wprintf(L"Indexed String 1: %s\n", wstr);
+
         r = hid_read(dev, response, 8);
         if (r < 0) {
             fatal("error reading data (%ls)", hid_error(dev));
@@ -482,7 +518,11 @@ void write_pedals() {
     }
     */
     usb_write(pd.start);
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+    Sleep(1000 * 1000);
+#else
     usleep(1000*1000);
+#endif
     write_pedal(&pd.pedals[0]);
     write_pedal(&pd.pedals[1]);
     write_pedal(&pd.pedals[2]);
