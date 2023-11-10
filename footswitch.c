@@ -74,10 +74,10 @@ void usage() {
 }
 
 void init_pid(unsigned short vid, unsigned short pid, int* pedal_index) {
-#ifdef OSX
-    hid_init();
-    dev = hid_open(vid, pid, NULL);
-#else
+// #ifdef OSX
+//     hid_init();
+//     dev = hid_open(vid, pid, NULL);
+// #else
     struct hid_device_info *info = NULL, *ptr = NULL;
     hid_init();
     info = hid_enumerate(vid, pid);
@@ -94,7 +94,7 @@ void init_pid(unsigned short vid, unsigned short pid, int* pedal_index) {
         ptr = ptr->next;
     }
     hid_free_enumeration(info);
-#endif
+// #endif
 }
 
 void init(int pedal_index) {
