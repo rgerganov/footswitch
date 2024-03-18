@@ -141,7 +141,7 @@ void read_pedals()
         //debug_arr(response, 8);
 
         printf("[switch %d]: ", i + 1);
-        if (response[1] >= 0x80 && response[1] <= 0x82 || response[1] == 0x84) {
+        if ((response[1] >= 0x80 && response[1] <= 0x82) || response[1] == 0x84) {
             print_mouse(response);
         } else if (response[1] == 0xff) {
             printf("undefined");
