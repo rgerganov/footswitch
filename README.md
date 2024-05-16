@@ -24,6 +24,25 @@ The same kind of foot switches are used for building the popular [VIM Clutch][2]
 Building
 --------
 
+Debian
+------
+
+On a debian machine, provided you have `devscripts` and `equivs` installed:
+
+```bash
+mk-build-deps -i
+dpkg-buildpackage -us -uc -b
+```
+
+Or, you can build the package in a Docker container:
+
+```bash
+docker build .
+```
+
+Other systems
+-------------
+
 The programs are using the [hidapi][3] library and should work on Linux and OSX. To build on Linux:
 
     sudo apt-get install libhidapi-dev
