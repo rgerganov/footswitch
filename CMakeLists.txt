@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
-project(footswitch-cli C)
+project(footswitch C)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY build)
 set(SRCDIR src)
@@ -12,13 +12,13 @@ link_libraries(${HIDAPI_LIBRARIES})
 link_directories(src)
 
 foreach(exe IN ITEMS footswitch scythe scythe2)
-  add_executable(${exe}-cli
+  add_executable(${exe}
     ${SRCDIR}/common.c
     ${SRCDIR}/debug.c
     ${SRCDIR}/${exe}.c
   )
 
-  install(TARGETS ${exe}-cli
+  install(TARGETS ${exe}
     RUNTIME DESTINATION bin
   )
 endforeach()

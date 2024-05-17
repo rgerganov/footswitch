@@ -6,6 +6,6 @@ footswitch
 obj*/
 *-build-deps_*
 debian/files
-debian/footswitch-cli/
-debian/footswitch-cli.substvars
+debian/footswitch/
+debian/footswitch.substvars
 debian/*debhelper*
