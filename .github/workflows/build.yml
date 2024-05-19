@@ -20,6 +20,20 @@ jobs:
     - name: Build
       run: make
 
+  deb-build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y devscripts equivs
+        sudo mk-build-deps -i -t 'apt-get -y --no-install-recommends'
+    - name: Build
+      run: dpkg-buildpackage -us -uc -b
+
   osx-build:
 
     runs-on: macos-latest

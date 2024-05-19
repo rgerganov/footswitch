@@ -1,0 +1,14 @@
+Source: footswitch
+Section: utils
+Priority: optional
+Maintainer: Radoslav Gerganov <rgerganov@gmail.com>
+Build-Depends:
+  cmake,
+  libhidapi-dev,
+  pkg-config
+
+Package: footswitch
+Description: Command-line tools to configure PCsensor and Scythe foot switches.
+Architecture: any
+Depends:
+  libhidapi-libusb0

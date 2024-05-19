@@ -1,46 +1,63 @@
-PREFIX = /usr/local
-UDEVPREFIX = /etc/udev
+PREFIX		:= /usr/local
+UDEVPREFIX	:= /etc/udev
 
-INSTALL = /usr/bin/install -c
-INSTALLDATA = /usr/bin/install -c -m 644
-CFLAGS = -Wall
-UNAME := $(shell uname)
+TARGETS	:= \
+	footswitch \
+	scythe \
+	scythe2
+
+INCDIR		:= include
+SRCDIR		:= src
+OBJDIR		:= obj
+
+COMMONSRC	:= \
+	common.c \
+	debug.c
+
+INSTALL	:= /usr/bin/install -c
+INSTALLDATA	:= /usr/bin/install -c -m 644
+CFLAGS		:= -Wall -I$(INCDIR)
+UNAME		:= $(shell uname)
+
 ifeq ($(UNAME), Darwin)
-	CFLAGS += -DOSX $(shell pkg-config --cflags hidapi)
-	LDLIBS = $(shell pkg-config --libs hidapi)
+	CFLAGS	+= -DOSX $(shell pkg-config --cflags hidapi)
+	LDLIBS	:= $(shell pkg-config --libs hidapi)
 else
 	ifeq ($(UNAME), Linux)
-		CFLAGS += $(shell pkg-config --cflags hidapi-libusb)
-		LDLIBS = $(shell pkg-config --libs hidapi-libusb)
+		CFLAGS	+= $(shell pkg-config --cflags hidapi-libusb)
+		LDLIBS	:= $(shell pkg-config --libs hidapi-libusb)
 	else
-		LDLIBS = -lhidapi
+		LDLIBS	:= -lhidapi
 	endif
 endif
 
-all: footswitch scythe scythe2
+all: $(OBJDIR) $(TARGETS)
 
-footswitch: footswitch.c common.c debug.c
-scythe: scythe.c common.c debug.c
-scythe2: scythe2.c common.c debug.c
+$(OBJDIR):
+	mkdir $@
+
+$(OBJDIR)/%.o: $(SRCDIR)/%.c
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+$(TARGETS): %: $(patsubst %.c, $(OBJDIR)/%.o, $(COMMONSRC)) $(OBJDIR)/%.o
+	$(CC) $(CFLAGS) -o $@ $^ $(LDLIBS)
 
 install: all
 	$(INSTALL) -d $(DESTDIR)$(PREFIX)/bin
-	$(INSTALL) footswitch $(DESTDIR)$(PREFIX)/bin
-	$(INSTALL) scythe $(DESTDIR)$(PREFIX)/bin
-	$(INSTALL) scythe2 $(DESTDIR)$(PREFIX)/bin
+	for target in $(TARGETS); do \
+		$(INSTALL) "$$target" $(DESTDIR)$(PREFIX)/bin; \
+	done
 ifeq ($(UNAME), Linux)
 	$(INSTALL) -d $(DESTDIR)$(UDEVPREFIX)/rules.d
 	$(INSTALLDATA) 19-footswitch.rules $(DESTDIR)$(UDEVPREFIX)/rules.d
 endif
 
 uninstall:
-	rm -f $(DESTDIR)$(PREFIX)/bin/footswitch
-	rm -f $(DESTDIR)$(PREFIX)/bin/scythe
-	rm -f $(DESTDIR)$(PREFIX)/bin/scythe2
+	rm -f $(addprefix $(DESTDIR)$(PREFIX)/bin/, $(TARGETS))
 ifeq ($(UNAME), Linux)
 	rm -f $(DESTDIR)$(UDEVPREFIX)/rules.d/19-footswitch.rules
 endif
 
 clean:
-	rm -f scythe scythe2 footswitch *.o
+	rm -rf $(TARGETS) $(OBJDIR)
 
