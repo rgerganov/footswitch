@@ -44,8 +44,8 @@ Archlinux
 
 Footswitch is available in the [AUR](https://aur.archlinux.org/packages/footswitch-git) and can be installed using your favourite AUR helper, for example:
 
-- `yay -S trackaudio-bin`
-- `paru -S trackaudio-bin`
+- `yay -S footswitch-git`
+- `paru -S footswitch-git`
 
 
 Other systems
