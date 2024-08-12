@@ -4,6 +4,7 @@ SUBSYSTEMS=="usb", ATTRS{idVendor}=="0c45", ATTRS{idProduct}=="7404", TAG+="uacc
 SUBSYSTEMS=="usb", ATTRS{idVendor}=="413d", ATTRS{idProduct}=="2107", TAG+="uaccess"
 SUBSYSTEMS=="usb", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="e026", TAG+="uaccess"
 SUBSYSTEMS=="usb", ATTRS{idVendor}=="3553", ATTRS{idProduct}=="b001", TAG+="uaccess"
+SUBSYSTEMS=="usb", ATTRS{idVendor}=="3553", ATTRS{idProduct}=="c010", TAG+="uaccess"
 # Scythe
 SUBSYSTEMS=="usb", ATTRS{idVendor}=="0426", ATTRS{idProduct}=="3011", TAG+="uaccess"
 # Scythe2
