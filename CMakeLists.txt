@@ -11,7 +11,7 @@ include_directories(${HIDAPI_INCLUDE_DIRS} include)
 link_libraries(${HIDAPI_LIBRARIES})
 link_directories(src)
 
-foreach(exe IN ITEMS footswitch scythe scythe2)
+foreach(exe IN ITEMS footswitch scythe scythe2 footswitch1p)
   add_executable(${exe}
     ${SRCDIR}/common.c
     ${SRCDIR}/debug.c

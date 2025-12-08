@@ -16,6 +16,7 @@ The following list of devices are supported:
 | 3553     | b001      | `footswitch`  |
 | 0426     | 3011      | `scythe`      |
 | 055a     | 0998      | `scythe2`     |
+| 5131     | 2019      | `footswitch1p`|
 
 You can find the `vendorId` and `productId` of your device using the `lsusb` command on Linux.
 

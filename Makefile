@@ -4,7 +4,8 @@ UDEVPREFIX	:= /etc/udev
 TARGETS	:= \
 	footswitch \
 	scythe \
-	scythe2
+	scythe2 \
+	footswitch1p
 
 INCDIR		:= include
 SRCDIR		:= src
