@@ -54,7 +54,7 @@ typedef struct pedal_data {
 pedal_data_t pd = { 0 };
 
 void usage() {
-    fprintf(stderr, "Usage: footswitch [-r] [-k <key>] [-m <modifier>] [-b <button>] [-xyw <XYW>]\n"
+    fprintf(stderr, "Usage: footswitch1p [-r] [-k <key>] [-m <modifier>] [-b <button>] [-xyw <XYW>]\n"
         "   -r          - read all pedals\n"
         "   -k key      - write the specified key\n"
         "   -m modifier - (l_,r_)ctrl|shift|alt|win\n"
