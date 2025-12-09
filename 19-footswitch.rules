@@ -8,3 +8,5 @@ SUBSYSTEMS=="usb", ATTRS{idVendor}=="3553", ATTRS{idProduct}=="b001", TAG+="uacc
 SUBSYSTEMS=="usb", ATTRS{idVendor}=="0426", ATTRS{idProduct}=="3011", TAG+="uaccess"
 # Scythe2
 SUBSYSTEMS=="usb", ATTRS{idVendor}=="055a", ATTRS{idProduct}=="0998", TAG+="uaccess"
+# FS1-P
+SUBSYSTEMS=="usb", ATTRS{idVendor}=="5131", ATTRS{idProduct}=="2019", TAG+="uaccess"
