@@ -73,12 +73,10 @@ void usage() {
 }
 
 void init_pid(unsigned short vid, unsigned short pid) {
-#ifdef OSX
-    hid_init();
-    dev = hid_open(vid, pid, NULL);
-#else
     struct hid_device_info *info = NULL, *ptr = NULL;
     hid_init();
+    // Config protocol is on interface 1. Interface 0 is the keyboard, which
+    // macOS won't open, so we can't just hid_open() by vid/pid here.
     info = hid_enumerate(vid, pid);
     ptr = info;
     while (ptr != NULL) {
@@ -89,6 +87,12 @@ void init_pid(unsigned short vid, unsigned short pid) {
         ptr = ptr->next;
     }
     hid_free_enumeration(info);
+#ifdef OSX
+    // Older hidapi (<0.14) doesn't report interface_number on macOS, so the
+    // loop finds nothing -- fall back to opening by vid/pid.
+    if (dev == NULL) {
+        dev = hid_open(vid, pid, NULL);
+    }
 #endif
 }
 
